@@ -276,7 +276,7 @@
             authDomain: "issam-bf5e3.firebaseapp.com",
             databaseURL: "https://issam-bf5e3-default-rtdb.firebaseio.com",
             projectId: "issam-bf5e3",
-            storageBucket: "issam-bf5e3.firebasestorage.app",
+            storageBucket: "issam-bf5e3.appspot.com",
             messagingSenderId: "87131430026",
             appId: "1:87131430026:web:5ad0e5614839c36dac6173",
             measurementId: "G-15XBD6NWQ2"
@@ -489,7 +489,7 @@
                 Swal.fire({
                     icon: 'error',
                     title: 'خطأ',
-                    text: 'حدث خطأ أثنائ إضافة التأمين: ' + error.message
+                    text: 'حدث خطأ أثناء إضافة التأمين: ' + error.message
                 });
             }
         });
@@ -576,9 +576,9 @@
                         spareParts = spareParts.filter(s => s.plateNumber !== vehicle.plateNumber);
 
                         await Promise.all([
-                            ...insurances.map(i => set(ref(database, 'insurances/' + i.id), i)),
-                            ...maintenances.map(m => set(ref(database, 'maintenances/' + m.id), m)),
-                            ...spareParts.map(s => set(ref(database, 'spareParts/' + s.id), s))
+                            ...insurances.map(i => remove(ref(database, 'insurances/' + i.id))),
+                            ...maintenances.map(m => remove(ref(database, 'maintenances/' + m.id))),
+                            ...spareParts.map(s => remove(ref(database, 'spareParts/' + s.id)))
                         ]);
 
                         updateVehicleSelects();
@@ -675,6 +675,7 @@
                         const index = maintenances.findIndex(m => m.id === id);
                         maintenances[index] = { id, ...updatedMaintenance };
                         renderTables();
+                        updateStats();
                         Swal.fire('تم التعديل!', 'تم تعديل صيانة الزيت بنجاح.', 'success');
                     } catch (error) {
                         Swal.fire({
@@ -699,8 +700,8 @@
                         <option value="">اختر المركبة</option>
                         ${vehicles.map(v => `<option value="${v.plateNumber}" ${sparePart.plateNumber === v.plateNumber ? 'selected' : ''}>${v.plateNumber} (${v.vehicleType})</option>`).join('')}
                     </select>
-                    <input id="date" id="editSparePartsDate" type="date" class="swal2-input" value="${sparePart.sparePartsDate}">
-                    <input id="text" id="editSparePartsNote" class="swal2-input" value="${sparePart.sparePartsNote}" placeholder="ملاحظة">
+                    <input type="date" id="editSparePartsDate" class="swal2-input" value="${sparePart.sparePartsDate}">
+                    <input type="text" id="editSparePartsNote" class="swal2-input" value="${sparePart.sparePartsNote}" placeholder="ملاحظة">
                 `,
                 showCancelButton: true,
                 confirmButtonText: 'حفظ',
@@ -739,16 +740,16 @@
 
         // تصدير إلى Excel
         document.getElementById('exportExcel').addEventListener('click', () => {
-            const vehicleData = vehicles.map(v => {
-                const insurance = insurances.find(ins => ins.plateNumber === v.plateNumber);
-                const const maintenance = maintenances.filter(m => m.plateNumber === v.plateNumber);
-                const sparePart = spareParts.filter(s => s.plateNumber === v.plateNumber);
+            const vehicleData = vehicles.map(vehicle => {
+                const insurance = insurances.find(ins => ins.plateNumber === vehicle.plateNumber);
+                const maintenance = maintenances.filter(m => m.plateNumber === vehicle.plateNumber);
+                const sparePart = spareParts.filter(s => s.plateNumber === vehicle.plateNumber);
                 return {
-                    'العلامة': v.vehicle.brand,
-                    'النوع': v.vehicle.model,
-                    'رقم التسجيل': v.vehicle.plateNumber,
-                    'السائق': v.vehicle.driverName,
-                    'نوع المركبة': v.vehicleType,
+                    'العلامة': vehicle.brand,
+                    'النوع': vehicle.model,
+                    'رقم التسجيل': vehicle.plateNumber,
+                    'السائق': vehicle.driverName,
+                    'نوع المركبة': vehicle.vehicleType,
                     'تاريخ بداية التأمين': insurance ? insurance.startDate : '-',
                     'تاريخ نهاية التأمين': insurance ? insurance.endDate : '-',
                     'الأيام المتبقية': insurance ? getDaysRemaining(insurance.endDate) : '-',
@@ -757,32 +758,32 @@
                     'عداد المركبة (كم)': maintenance.length ? maintenance.map(m => m.currentMileage).join(', ') : '-',
                     'عداد التغيير القادم (كم)': maintenance.length ? maintenance.map(m => m.nextMileage).join(', ') : '-',
                     'تاريخ صيانة قطع الغيار': sparePart.length ? sparePart.map(s => s.sparePartsDate).join(', ') : '-',
-                    'ملاحظة قطع الغيار': sparePart.length ? spareParts.map(s => s.sparePartsNote).join(', ') : '-'
+                    'ملاحظة قطع الغيار': sparePart.length ? sparePart.map(s => s.sparePartsNote).join(', ') : '-'
                 };
             });
 
-            const worksheet = XLSX.utils.json_to_json_to_sheet(vehicleData);
+            const worksheet = XLSX.utils.json_to_sheet(vehicleData);
             const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append(book_append_sheet(workbook, worksheet, 'Vehicles' Data'));
+            XLSX.utils.book_append_sheet(workbook, worksheet, 'Vehicles Data');
             XLSX.writeFile(workbook, 'vehicles_data.xlsx');
         });
 
         // فلترة الجداول
-        document.getElementById('vehiclesearch').value.addEventListener('input', () => renderTables());
-        document.getElementById('maintenanceSearch').value.addEventListener('input', () => renderTables());
-        document.getElementById('sparePartsSearch').value.addEventListener('input', () => renderTables());
+        document.getElementById('vehicleSearch').addEventListener('input', () => renderTables());
+        document.getElementById('maintenanceSearch').addEventListener('input', () => renderTables());
+        document.getElementById('sparePartsSearch').addEventListener('input', () => renderTables());
 
         function renderTables() {
-            const vehicleSearch = document.getElementById('vehiclesearch').value.toLowerCase();
+            const vehicleSearch = document.getElementById('vehicleSearch').value.toLowerCase();
             const maintenanceSearch = document.getElementById('maintenanceSearch').value.toLowerCase();
             const sparePartsSearch = document.getElementById('sparePartsSearch').value.toLowerCase();
 
             // جدول المركبات
             const vehiclesTableBody = document.getElementById('vehiclesTableBody');
             vehiclesTableBody.innerHTML = '';
-            vehicles.filter(v => v.plateNumber.toLowerCase().contains(vehicleSearch)).forEach(vehicle => {
-                const insurance = insurances.find(ins => ins.plateNumber === v.plateNumber);
-                const const row = document.createElement('tr');
+            vehicles.filter(v => v.plateNumber.toLowerCase().includes(vehicleSearch)).forEach(vehicle => {
+                const insurance = insurances.find(ins => ins.plateNumber === vehicle.plateNumber);
+                const row = document.createElement('tr');
                 let daysRemaining = '-';
                 let status = '-';
 
@@ -896,11 +897,11 @@
                         await remove(ref(database, 'spareParts/' + id));
                         spareParts = spareParts.filter(s => s.id !== id);
                         renderTables();
-                        Swal.fire('تم 'الحذف!', 'تم حذف تسجيل قطع الغيار بنجاح.', 'success');
+                        Swal.fire('تم الحذف!', 'تم حذف تسجيل قطع الغيار بنجاح.', 'success');
                     } catch (error) {
                         Swal.fire({
                             icon: 'error',
-                            title: 'خطأطأ',
+                            title: 'خطأ',
                             text: 'حدث خطأ أثناء الحذف: ' + error.message
                         });
                     }
@@ -914,7 +915,7 @@
             if (insuranceStatusChart) insuranceStatusChart.destroy();
 
             // رسم بياني لعدد المركبات حسب النوع
-            const vehicleTypes = vehicles.reduce((typeacc, v) => {
+            const vehicleTypes = vehicles.reduce((acc, v) => {
                 acc[v.vehicleType] = (acc[v.vehicleType] || 0) + 1;
                 return acc;
             }, {});
