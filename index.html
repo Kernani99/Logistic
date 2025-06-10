@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>إدارة تأمينات وصيانة المركبات</title>
+    <title>نظام إدارة تأمينات وصيانة المركبات</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -47,24 +47,60 @@
             margin: 0 auto;
         }
         .hidden { display: none; }
+        .action-btn {
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        .action-btn:hover {
+            transform: translateY(-2px);
+        }
+        .floating-buttons {
+            position: fixed;
+            bottom: 2rem;
+            left: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            z-index: 50;
+        }
+        .floating-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+        }
+        .floating-btn:hover {
+            transform: scale(1.1);
+        }
     </style>
 </head>
 <body class="bg-gray-100">
     <!-- شريط التنقل -->
     <nav id="navbar" class="navbar p-4 text-white shadow-lg hidden">
         <div class="container mx-auto flex justify-between items-center">
-            <div class="flex items-center">
-                <img src="https://brandlogos.net/wp-content/uploads/2022/10/sym_-_sanyang_motor-logo_brandlogos.net_mre4v.png" alt="Logo" class="mr-2">
-                <span class="text-xl font-bold">إدارة المركبات</span>
+            <div class="flex items-center space-x-2">
+                <img src="https://brandlogos.net/wp-content/uploads/2022/10/sym_-_sanyang_motor-logo_brandlogos.net_mre4v.png" alt="Logo" class="h-12 w-auto">
+                <span class="text-xl font-bold hidden md:block">نظام إدارة المركبات</span>
             </div>
-            <div class="space-x-4">
-                <button id="dashboardNav" class="hover:text-blue-300"><i class="fas fa-car mr-1"></i> الإدارة</button>
-                <button id="statsNav" class="hover:text-blue-300"><i class="fas fa-chart-bar mr-1"></i> الإحصائيات</button>
-                <button id="darkModeToggle" class="text-white hover:text-blue-300">
+            <div class="flex items-center space-x-4">
+                <button id="dashboardNav" class="hover:text-blue-300 px-3 py-1 rounded transition">
+                    <i class="fas fa-car mr-1"></i> <span class="hidden md:inline">لوحة التحكم</span>
+                </button>
+                <button id="insurancesNav" class="hover:text-blue-300 px-3 py-1 rounded transition">
+                    <i class="fas fa-shield-alt mr-1"></i> <span class="hidden md:inline">التأمينات</span>
+                </button>
+                <button id="statsNav" class="hover:text-blue-300 px-3 py-1 rounded transition">
+                    <i class="fas fa-chart-bar mr-1"></i> <span class="hidden md:inline">الإحصائيات</span>
+                </button>
+                <button id="darkModeToggle" class="text-white hover:text-blue-300 p-2 rounded-full">
                     <i class="fas fa-moon"></i>
                 </button>
-                <button id="logout" class="bg-red-600 text-white px-3 py-2 rounded hover:bg-red-700">
-                    <i class="fas fa-sign-out-alt mr-1"></i> تسجيل الخروج
+                <button id="logout" class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded transition">
+                    <i class="fas fa-sign-out-alt mr-1"></i> <span class="hidden md:inline">تسجيل الخروج</span>
                 </button>
             </div>
         </div>
@@ -72,7 +108,7 @@
 
     <!-- واجهة تسجيل الدخول -->
     <div id="loginView" class="login-container">
-        <img src="https://brandlogos.net/wp-content/uploads/2022/10/sym_-_sanyang_motor-logo_brandlogos.net_mre4v.png" alt="Logo" class="logo mb-4">
+        <img src="https://via.placeholder.com/80" alt="Logo" class="logo mb-4">
         <h1 class="text-2xl font-bold text-center text-gray-800 mb-6">
             <i class="fas fa-lock mr-2"></i> تسجيل الدخول
         </h1>
@@ -110,7 +146,7 @@
         </div>
 
         <h1 class="text-3xl font-bold text-center text-gray-800 mb-6">
-            <i class="fas fa-car-side mr-2"></i> إدارة تأمينات وصيانة المركبات
+            <i class="fas fa-car-side mr-2"></i> نظام إدارة المركبات
         </h1>
 
         <!-- زر تصدير إلى Excel -->
@@ -120,68 +156,20 @@
             </button>
         </div>
 
-        <!-- نموذج إضافة مركبة -->
-        <div id="vehicles" class="bg-white p-6 rounded-lg shadow-lg mb-6">
-            <h2 class="text-xl font-semibold text-gray-700 mb-4"><i class="fas fa-plus-circle mr-2"></i> إضافة مركبة</h2>
-            <form id="vehicleForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <input type="text" id="brand" placeholder="العلامة التجارية" class="p-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                <input type="text" id="model" placeholder="النوع" class="p-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                <input type="text" id="plateNumber" placeholder="رقم التسجيل" class="p-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                <input type="text" id="driverName" placeholder="اسم السائق" class="p-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                <select id="vehicleType" class="p-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                    <option value="سيارة">سيارة</option>
-                    <option value="شاحنة">شاحنة</option>
-                </select>
-                <button type="submit" class="col-span-1 md:col-span-2 bg-blue-600 text-white p-3 rounded hover:bg-blue-700">
-                    <i class="fas fa-save mr-2"></i> إضافة المركبة
-                </button>
-            </form>
-        </div>
-
-        <!-- نموذج إضافة تأمين -->
-        <div id="insurances" class="bg-white p-6 rounded-lg shadow-lg mb-6">
-            <h2 class="text-xl font-semibold text-gray-700 mb-4"><i class="fas fa-shield-alt mr-2"></i> إضافة تأمين</h2>
-            <form id="insuranceForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <select id="vehicleSelect" class="p-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                    <option value="">اختر المركبة</option>
-                </select>
-                <input type="date" id="insuranceStart" class="p-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                <input type="date" id="insuranceEnd" class="p-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                <button type="submit" class="col-span-1 md:col-span-2 bg-green-600 text-white p-3 rounded hover:bg-green-700">
-                    <i class="fas fa-save mr-2"></i> إضافة تأمين
-                </button>
-            </form>
-        </div>
-
-        <!-- نموذج إضافة صيانة زيت -->
-        <div id="maintenance" class="bg-white p-6 rounded-lg shadow-lg mb-6">
-            <h2 class="text-xl font-semibold text-gray-700 mb-4"><i class="fas fa-oil-can mr-2"></i> إضافة صيانة زيت</h2>
-            <form id="maintenanceForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <select id="maintenanceVehicleSelect" class="p-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                    <option value="">اختر المركبة</option>
-                </select>
-                <input type="date" id="oilChangeDate" class="p-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                <input type="number" id="currentMileage" placeholder="عداد المركبة الحالي (كم)" class="p-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                <input type="number" id="nextMileage" placeholder="عداد تغيير الزيت القادم (كم)" class="p-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                <button type="submit" class="col-span-1 md:col-span-2 bg-yellow-600 text-white p-3 rounded hover:bg-yellow-700">
-                    <i class="fas fa-save mr-2"></i> إضافة صيانة
-                </button>
-            </form>
-        </div>
-
-        <!-- نموذج إضافة صيانة قطع غيار -->
-        <div id="spareParts" class="bg-white p-6 rounded-lg shadow-lg mb-6">
-            <h2 class="text-xl font-semibold text-gray-700 mb-4"><i class="fas fa-tools mr-2"></i> إضافة صيانة قطع غيار</h2>
-            <form id="sparePartsForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <select id="sparePartsVehicleSelect" class="p-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                    <option value="">اختر المركبة</option>
-                </select>
-                <input type="date" id="sparePartsDate" class="p-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                <input type="text" id="sparePartsNote" placeholder="ملاحظة (الغيار الذي تم تغييره)" class="p-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                <button type="submit" class="col-span-1 md:col-span-2 bg-indigo-600 text-white p-3 rounded hover:bg-indigo-700">
-                    <i class="fas fa-save mr-2"></i> إضافة صيانة قطع غيار
-                </button>
-            </form>
+        <!-- أزرار الإضافة العائمة -->
+        <div class="floating-buttons">
+            <button id="addVehicleBtn" class="floating-btn bg-blue-600 text-white">
+                <i class="fas fa-car"></i>
+            </button>
+            <button id="addInsuranceBtn" class="floating-btn bg-green-600 text-white">
+                <i class="fas fa-shield-alt"></i>
+            </button>
+            <button id="addMaintenanceBtn" class="floating-btn bg-yellow-600 text-white">
+                <i class="fas fa-oil-can"></i>
+            </button>
+            <button id="addSparePartsBtn" class="floating-btn bg-indigo-600 text-white">
+                <i class="fas fa-tools"></i>
+            </button>
         </div>
 
         <!-- جدول المركبات -->
@@ -249,6 +237,52 @@
         </div>
     </div>
 
+    <!-- واجهة التأمينات -->
+    <div id="insurancesView" class="container mx-auto p-6 max-w-6xl hidden">
+        <h1 class="text-3xl font-bold text-center text-gray-800 mb-6">
+            <i class="fas fa-shield-alt mr-2"></i> إدارة تأمينات المركبات
+        </h1>
+
+        <!-- فلترة البحث -->
+        <div class="bg-white p-4 rounded-lg shadow mb-6">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div class="flex-1">
+                    <input type="text" id="insuranceSearch" placeholder="ابحث برقم التسجيل..." 
+                           class="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="flex space-x-2">
+                    <select id="insuranceStatusFilter" class="p-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="all">جميع الحالات</option>
+                        <option value="active">فعال</option>
+                        <option value="expiring">قريب من الانتهاء</option>
+                        <option value="expired">منتهي</option>
+                    </select>
+                    <button id="resetInsuranceFilters" class="bg-gray-200 text-gray-700 p-3 rounded hover:bg-gray-300">
+                        <i class="fas fa-redo mr-1"></i> إعادة تعيين
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- جدول التأمينات -->
+        <div class="bg-white p-6 rounded-lg shadow-lg">
+            <table class="w-full border-collapse">
+                <thead>
+                    <tr class="bg-blue-600 text-white">
+                        <th class="p-3">رقم التسجيل</th>
+                        <th class="p-3">المركبة</th>
+                        <th class="p-3">تاريخ البدء</th>
+                        <th class="p-3">تاريخ الانتهاء</th>
+                        <th class="p-3">الأيام المتبقية</th>
+                        <th class="p-3">الحالة</th>
+                        <th class="p-3">إجراءات</th>
+                    </tr>
+                </thead>
+                <tbody id="insurancesTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
     <!-- واجهة الإحصائيات -->
     <div id="statsView" class="container mx-auto p-6 max-w-6xl hidden">
         <h1 class="text-3xl font-bold text-center mb-6 text-gray-800">
@@ -297,6 +331,7 @@
             document.getElementById('loginView').classList.add('hidden');
             document.getElementById('dashboardView').classList.add('hidden');
             document.getElementById('statsView').classList.add('hidden');
+            document.getElementById('insurancesView').classList.add('hidden');
             document.getElementById('navbar').classList.add('hidden');
 
             if (view === 'login') {
@@ -308,6 +343,9 @@
                 } else if (view === 'stats') {
                     document.getElementById('statsView').classList.remove('hidden');
                     renderCharts();
+                } else if (view === 'insurances') {
+                    document.getElementById('insurancesView').classList.remove('hidden');
+                    renderInsurancesTable();
                 }
             }
             currentView = view;
@@ -363,6 +401,7 @@
 
         // التنقل بين الواجهات
         document.getElementById('dashboardNav').addEventListener('click', () => showView('dashboard'));
+        document.getElementById('insurancesNav').addEventListener('click', () => showView('insurances'));
         document.getElementById('statsNav').addEventListener('click', () => showView('stats'));
 
         // الوضع الليلي
@@ -408,13 +447,15 @@
                 document.getElementById('sparePartsVehicleSelect')
             ];
             selects.forEach(select => {
-                select.innerHTML = '<option value="">اختر المركبة</option>';
-                vehicles.forEach(vehicle => {
-                    const option = document.createElement('option');
-                    option.value = vehicle.plateNumber;
-                    option.textContent = `${vehicle.plateNumber} (${vehicle.vehicleType})`;
-                    select.appendChild(option);
-                });
+                if (select) {
+                    select.innerHTML = '<option value="">اختر المركبة</option>';
+                    vehicles.forEach(vehicle => {
+                        const option = document.createElement('option');
+                        option.value = vehicle.plateNumber;
+                        option.textContent = `${vehicle.plateNumber} (${vehicle.vehicleType})`;
+                        select.appendChild(option);
+                    });
+                }
             });
         }
 
@@ -432,126 +473,216 @@
             document.getElementById('upcomingMaintenances').textContent = upcomingMaintenances;
         }
 
-        // إضافة مركبة
-        document.getElementById('vehicleForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const vehicle = {
-                brand: document.getElementById('brand').value,
-                model: document.getElementById('model').value,
-                plateNumber: document.getElementById('plateNumber').value,
-                driverName: document.getElementById('driverName').value,
-                vehicleType: document.getElementById('vehicleType').value
-            };
+        // عرض نموذج إضافة مركبة
+        document.getElementById('addVehicleBtn').addEventListener('click', () => {
+            Swal.fire({
+                title: 'إضافة مركبة جديدة',
+                html: `
+                    <input type="text" id="swalBrand" placeholder="العلامة التجارية" class="swal2-input" required>
+                    <input type="text" id="swalModel" placeholder="النوع" class="swal2-input" required>
+                    <input type="text" id="swalPlateNumber" placeholder="رقم التسجيل" class="swal2-input" required>
+                    <input type="text" id="swalDriverName" placeholder="اسم السائق" class="swal2-input" required>
+                    <select id="swalVehicleType" class="swal2-select" required>
+                        <option value="سيارة">سيارة</option>
+                        <option value="شاحنة">شاحنة</option>
+                    </select>
+                `,
+                focusConfirm: false,
+                showCancelButton: true,
+                confirmButtonText: 'حفظ',
+                cancelButtonText: 'إلغاء',
+                preConfirm: async () => {
+                    const vehicle = {
+                        brand: document.getElementById('swalBrand').value,
+                        model: document.getElementById('swalModel').value,
+                        plateNumber: document.getElementById('swalPlateNumber').value,
+                        driverName: document.getElementById('swalDriverName').value,
+                        vehicleType: document.getElementById('swalVehicleType').value
+                    };
 
-            try {
-                await set(ref(database, 'vehicles/' + vehicle.plateNumber), vehicle);
-                vehicles.push({ id: vehicle.plateNumber, ...vehicle });
-                updateVehicleSelects();
-                renderTables();
-                updateStats();
-                document.getElementById('vehicleForm').reset();
-                Swal.fire({
-                    icon: 'success',
-                    title: 'تمت الإضافة',
-                    text: 'تم إضافة المركبة بنجاح!'
-                });
-            } catch (error) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'خطأ',
-                    text: 'حدث خطأ أثناء إضافة المركبة: ' + error.message
-                });
-            }
+                    if (!vehicle.brand || !vehicle.model || !vehicle.plateNumber || !vehicle.driverName) {
+                        Swal.showValidationMessage('جميع الحقول مطلوبة');
+                        return false;
+                    }
+
+                    try {
+                        await set(ref(database, 'vehicles/' + vehicle.plateNumber), vehicle);
+                        vehicles.push({ id: vehicle.plateNumber, ...vehicle });
+                        updateVehicleSelects();
+                        renderTables();
+                        updateStats();
+                        return true;
+                    } catch (error) {
+                        Swal.showValidationMessage('حدث خطأ أثناء الإضافة: ' + error.message);
+                        return false;
+                    }
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'تمت الإضافة',
+                        text: 'تم إضافة المركبة بنجاح!'
+                    });
+                }
+            });
         });
 
-        // إضافة تأمين
-        document.getElementById('insuranceForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const insurance = {
-                plateNumber: document.getElementById('vehicleSelect').value,
-                startDate: document.getElementById('insuranceStart').value,
-                endDate: document.getElementById('insuranceEnd').value
-            };
-            const id = Date.now().toString();
+        // عرض نموذج إضافة تأمين
+        document.getElementById('addInsuranceBtn').addEventListener('click', () => {
+            Swal.fire({
+                title: 'إضافة تأمين جديد',
+                html: `
+                    <select id="swalVehicleSelect" class="swal2-select" required>
+                        <option value="">اختر المركبة</option>
+                        ${vehicles.map(v => `<option value="${v.plateNumber}">${v.plateNumber} (${v.vehicleType})</option>`).join('')}
+                    </select>
+                    <input type="date" id="swalInsuranceStart" class="swal2-input" required>
+                    <input type="date" id="swalInsuranceEnd" class="swal2-input" required>
+                `,
+                focusConfirm: false,
+                showCancelButton: true,
+                confirmButtonText: 'حفظ',
+                cancelButtonText: 'إلغاء',
+                preConfirm: async () => {
+                    const insurance = {
+                        plateNumber: document.getElementById('swalVehicleSelect').value,
+                        startDate: document.getElementById('swalInsuranceStart').value,
+                        endDate: document.getElementById('swalInsuranceEnd').value
+                    };
 
-            try {
-                await set(ref(database, 'insurances/' + id), insurance);
-                insurances.push({ id, ...insurance });
-                document.getElementById('insuranceForm').reset();
-                renderTables();
-                updateStats();
-                Swal.fire({
-                    icon: 'success',
-                    title: 'تمت الإضافة',
-                    text: 'تم إضافة التأمين بنجاح!'
-                });
-            } catch (error) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'خطأ',
-                    text: 'حدث خطأ أثناء إضافة التأمين: ' + error.message
-                });
-            }
+                    if (!insurance.plateNumber || !insurance.startDate || !insurance.endDate) {
+                        Swal.showValidationMessage('جميع الحقول مطلوبة');
+                        return false;
+                    }
+
+                    const id = Date.now().toString();
+
+                    try {
+                        await set(ref(database, 'insurances/' + id), insurance);
+                        insurances.push({ id, ...insurance });
+                        renderTables();
+                        updateStats();
+                        return true;
+                    } catch (error) {
+                        Swal.showValidationMessage('حدث خطأ أثناء الإضافة: ' + error.message);
+                        return false;
+                    }
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'تمت الإضافة',
+                        text: 'تم إضافة التأمين بنجاح!'
+                    });
+                }
+            });
         });
 
-        // إضافة صيانة زيت
-        document.getElementById('maintenanceForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const maintenance = {
-                plateNumber: document.getElementById('maintenanceVehicleSelect').value,
-                oilChangeDate: document.getElementById('oilChangeDate').value,
-                currentMileage: parseInt(document.getElementById('currentMileage').value),
-                nextMileage: parseInt(document.getElementById('nextMileage').value)
-            };
-            const id = Date.now().toString();
+        // عرض نموذج إضافة صيانة زيت
+        document.getElementById('addMaintenanceBtn').addEventListener('click', () => {
+            Swal.fire({
+                title: 'إضافة صيانة زيت',
+                html: `
+                    <select id="swalMaintenanceVehicleSelect" class="swal2-select" required>
+                        <option value="">اختر المركبة</option>
+                        ${vehicles.map(v => `<option value="${v.plateNumber}">${v.plateNumber} (${v.vehicleType})</option>`).join('')}
+                    </select>
+                    <input type="date" id="swalOilChangeDate" class="swal2-input" required>
+                    <input type="number" id="swalCurrentMileage" placeholder="عداد المركبة الحالي (كم)" class="swal2-input" required>
+                    <input type="number" id="swalNextMileage" placeholder="عداد تغيير الزيت القادم (كم)" class="swal2-input" required>
+                `,
+                focusConfirm: false,
+                showCancelButton: true,
+                confirmButtonText: 'حفظ',
+                cancelButtonText: 'إلغاء',
+                preConfirm: async () => {
+                    const maintenance = {
+                        plateNumber: document.getElementById('swalMaintenanceVehicleSelect').value,
+                        oilChangeDate: document.getElementById('swalOilChangeDate').value,
+                        currentMileage: parseInt(document.getElementById('swalCurrentMileage').value),
+                        nextMileage: parseInt(document.getElementById('swalNextMileage').value)
+                    };
 
-            try {
-                await set(ref(database, 'maintenances/' + id), maintenance);
-                maintenances.push({ id, ...maintenance });
-                document.getElementById('maintenanceForm').reset();
-                renderTables();
-                updateStats();
-                Swal.fire({
-                    icon: 'success',
-                    title: 'تمت الإضافة',
-                    text: 'تم إضافة سجل صيانة الزيت بنجاح!'
-                });
-            } catch (error) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'خطأ',
-                    text: 'حدث خطأ أثناء إضافة الصيانة: ' + error.message
-                });
-            }
+                    if (!maintenance.plateNumber || !maintenance.oilChangeDate || !maintenance.currentMileage || !maintenance.nextMileage) {
+                        Swal.showValidationMessage('جميع الحقول مطلوبة');
+                        return false;
+                    }
+
+                    const id = Date.now().toString();
+
+                    try {
+                        await set(ref(database, 'maintenances/' + id), maintenance);
+                        maintenances.push({ id, ...maintenance });
+                        renderTables();
+                        updateStats();
+                        return true;
+                    } catch (error) {
+                        Swal.showValidationMessage('حدث خطأ أثناء الإضافة: ' + error.message);
+                        return false;
+                    }
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'تمت الإضافة',
+                        text: 'تم إضافة سجل صيانة الزيت بنجاح!'
+                    });
+                }
+            });
         });
 
-        // إضافة صيانة قطع غيار
-        document.getElementById('sparePartsForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const sparePart = {
-                plateNumber: document.getElementById('sparePartsVehicleSelect').value,
-                sparePartsDate: document.getElementById('sparePartsDate').value,
-                sparePartsNote: document.getElementById('sparePartsNote').value
-            };
-            const id = Date.now().toString();
+        // عرض نموذج إضافة صيانة قطع غيار
+        document.getElementById('addSparePartsBtn').addEventListener('click', () => {
+            Swal.fire({
+                title: 'إضافة صيانة قطع غيار',
+                html: `
+                    <select id="swalSparePartsVehicleSelect" class="swal2-select" required>
+                        <option value="">اختر المركبة</option>
+                        ${vehicles.map(v => `<option value="${v.plateNumber}">${v.plateNumber} (${v.vehicleType})</option>`).join('')}
+                    </select>
+                    <input type="date" id="swalSparePartsDate" class="swal2-input" required>
+                    <input type="text" id="swalSparePartsNote" placeholder="ملاحظة (الغيار الذي تم تغييره)" class="swal2-input" required>
+                `,
+                focusConfirm: false,
+                showCancelButton: true,
+                confirmButtonText: 'حفظ',
+                cancelButtonText: 'إلغاء',
+                preConfirm: async () => {
+                    const sparePart = {
+                        plateNumber: document.getElementById('swalSparePartsVehicleSelect').value,
+                        sparePartsDate: document.getElementById('swalSparePartsDate').value,
+                        sparePartsNote: document.getElementById('swalSparePartsNote').value
+                    };
 
-            try {
-                await set(ref(database, 'spareParts/' + id), sparePart);
-                spareParts.push({ id, ...sparePart });
-                document.getElementById('sparePartsForm').reset();
-                renderTables();
-                Swal.fire({
-                    icon: 'success',
-                    title: 'تمت الإضافة',
-                    text: 'تم إضافة سجل صيانة قطع الغيار بنجاح!'
-                });
-            } catch (error) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'خطأ',
-                    text: 'حدث خطأ أثناء إضافة قطع الغيار: ' + error.message
-                });
-            }
+                    if (!sparePart.plateNumber || !sparePart.sparePartsDate || !sparePart.sparePartsNote) {
+                        Swal.showValidationMessage('جميع الحقول مطلوبة');
+                        return false;
+                    }
+
+                    const id = Date.now().toString();
+
+                    try {
+                        await set(ref(database, 'spareParts/' + id), sparePart);
+                        spareParts.push({ id, ...sparePart });
+                        renderTables();
+                        return true;
+                    } catch (error) {
+                        Swal.showValidationMessage('حدث خطأ أثناء الإضافة: ' + error.message);
+                        return false;
+                    }
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'تمت الإضافة',
+                        text: 'تم إضافة سجل قطع الغيار بنجاح!'
+                    });
+                }
+            });
         });
 
         // حذف مركبة
@@ -772,6 +903,13 @@
         document.getElementById('vehicleSearch').addEventListener('input', () => renderTables());
         document.getElementById('maintenanceSearch').addEventListener('input', () => renderTables());
         document.getElementById('sparePartsSearch').addEventListener('input', () => renderTables());
+        document.getElementById('insuranceSearch').addEventListener('input', () => renderInsurancesTable());
+        document.getElementById('insuranceStatusFilter').addEventListener('change', () => renderInsurancesTable());
+        document.getElementById('resetInsuranceFilters').addEventListener('click', () => {
+            document.getElementById('insuranceSearch').value = '';
+            document.getElementById('insuranceStatusFilter').value = 'all';
+            renderInsurancesTable();
+        });
 
         function renderTables() {
             const vehicleSearch = document.getElementById('vehicleSearch').value.toLowerCase();
@@ -811,8 +949,12 @@
                     <td class="text-center p-3">${daysRemaining}</td>
                     <td class="text-center p-3">${status}</td>
                     <td class="p-3">
-                        <button onclick="editVehicle('${vehicle.id}')"><i class="fas fa-edit mr-2"></i></button>
-                        <button onclick="deleteVehicle('${vehicle.id}')"><i class="fas fa-trash text-red-600"></i></button>
+                        <button onclick="editVehicle('${vehicle.id}')" class="action-btn text-blue-600 hover:text-blue-800 mr-2">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button onclick="deleteVehicle('${vehicle.id}')" class="action-btn text-red-600 hover:text-red-800">
+                            <i class="fas fa-trash"></i>
+                        </button>
                     </td>
                 `;
                 vehiclesTableBody.appendChild(row);
@@ -829,8 +971,12 @@
                     <td class="p-3">${maintenance.currentMileage}</td>
                     <td class="p-3">${maintenance.nextMileage}</td>
                     <td class="p-3">
-                        <button onclick="editMaintenance('${maintenance.id}')"><i class="fas fa-edit mr-2"></i></button>
-                        <button onclick="deleteMaintenance('${maintenance.id}')"><i class="fas fa-trash text-red-600"></i></button>
+                        <button onclick="editMaintenance('${maintenance.id}')" class="action-btn text-blue-600 hover:text-blue-800 mr-2">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button onclick="deleteMaintenance('${maintenance.id}')" class="action-btn text-red-600 hover:text-red-800">
+                            <i class="fas fa-trash"></i>
+                        </button>
                     </td>
                 `;
                 maintenanceTableBody.appendChild(row);
@@ -846,13 +992,122 @@
                     <td class="p-3">${sparePart.sparePartsDate}</td>
                     <td class="p-3">${sparePart.sparePartsNote}</td>
                     <td class="p-3">
-                        <button onclick="editSparePart('${sparePart.id}')"><i class="fas fa-edit mr-2"></i></button>
-                        <button onclick="deleteSparePart('${sparePart.id}')"><i class="fas fa-trash text-red-600"></i></button>
+                        <button onclick="editSparePart('${sparePart.id}')" class="action-btn text-blue-600 hover:text-blue-800 mr-2">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button onclick="deleteSparePart('${sparePart.id}')" class="action-btn text-red-600 hover:text-red-800">
+                            <i class="fas fa-trash"></i>
+                        </button>
                     </td>
                 `;
                 sparePartsTableBody.appendChild(row);
             });
         }
+
+        function renderInsurancesTable() {
+            const searchTerm = document.getElementById('insuranceSearch').value.toLowerCase();
+            const statusFilter = document.getElementById('insuranceStatusFilter').value;
+
+            const insurancesTableBody = document.getElementById('insurancesTableBody');
+            insurancesTableBody.innerHTML = '';
+
+            insurances
+                .filter(ins => ins.plateNumber.toLowerCase().includes(searchTerm))
+                .filter(ins => {
+                    if (statusFilter === 'all') return true;
+                    const daysRemaining = getDaysRemaining(ins.endDate);
+                    if (statusFilter === 'active') return daysRemaining > 7;
+                    if (statusFilter === 'expiring') return daysRemaining <= 7 && daysRemaining >= 0;
+                    if (statusFilter === 'expired') return daysRemaining < 0;
+                    return true;
+                })
+                .forEach(insurance => {
+                    const vehicle = vehicles.find(v => v.plateNumber === insurance.plateNumber);
+                    const daysRemaining = getDaysRemaining(insurance.endDate);
+                    let status = '';
+                    let statusClass = '';
+
+                    if (daysRemaining <= 0) {
+                        status = 'منتهي';
+                        statusClass = 'bg-red-100 text-red-800';
+                    } else if (daysRemaining <= 7) {
+                        status = 'قريب من الانتهاء';
+                        statusClass = 'bg-yellow-100 text-yellow-800';
+                    } else {
+                        status = 'فعال';
+                        statusClass = 'bg-green-100 text-green-800';
+                    }
+
+                    const row = document.createElement('tr');
+                    if (daysRemaining <= 0) {
+                        row.classList.add('expired');
+                    } else if (daysRemaining <= 7) {
+                        row.classList.add('warning');
+                    }
+
+                    row.innerHTML = `
+                        <td class="p-3">${insurance.plateNumber}</td>
+                        <td class="p-3">${vehicle ? `${vehicle.brand} ${vehicle.model}` : 'غير معروف'}</td>
+                        <td class="p-3">${insurance.startDate}</td>
+                        <td class="p-3">${insurance.endDate}</td>
+                        <td class="p-3 text-center">${daysRemaining}</td>
+                        <td class="p-3 text-center"><span class="px-2 py-1 rounded-full text-xs ${statusClass}">${status}</span></td>
+                        <td class="p-3">
+                            <button onclick="editInsurance('${insurance.id}')" class="action-btn text-blue-600 hover:text-blue-800 mr-2">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button onclick="deleteInsurance('${insurance.id}')" class="action-btn text-red-600 hover:text-red-800">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    `;
+                    insurancesTableBody.appendChild(row);
+                });
+        }
+
+        // تعديل تأمين
+        window.editInsurance = function(id) {
+            const insurance = insurances.find(i => i.id === id);
+            if (!insurance) return;
+
+            Swal.fire({
+                title: 'تعديل التأمين',
+                html: `
+                    <select id="editInsurancePlate" class="swal2-select">
+                        <option value="">اختر المركبة</option>
+                        ${vehicles.map(v => `<option value="${v.plateNumber}" ${insurance.plateNumber === v.plateNumber ? 'selected' : ''}>${v.plateNumber} (${v.vehicleType})</option>`).join('')}
+                    </select>
+                    <input type="date" id="editInsuranceStart" class="swal2-input" value="${insurance.startDate}">
+                    <input type="date" id="editInsuranceEnd" class="swal2-input" value="${insurance.endDate}">
+                `,
+                showCancelButton: true,
+                confirmButtonText: 'حفظ',
+                cancelButtonText: 'إلغاء',
+                preConfirm: async () => {
+                    const updatedInsurance = {
+                        plateNumber: document.getElementById('editInsurancePlate').value,
+                        startDate: document.getElementById('editInsuranceStart').value,
+                        endDate: document.getElementById('editInsuranceEnd').value
+                    };
+
+                    try {
+                        await set(ref(database, 'insurances/' + id), updatedInsurance);
+                        const index = insurances.findIndex(i => i.id === id);
+                        insurances[index] = { id, ...updatedInsurance };
+                        renderTables();
+                        renderInsurancesTable();
+                        updateStats();
+                        Swal.fire('تم التعديل!', 'تم تعديل التأمين بنجاح.', 'success');
+                    } catch (error) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'خطأ',
+                            text: 'حدث خطأ أثناء التعديل: ' + error.message
+                        });
+                    }
+                }
+            });
+        };
 
         // حذف صيانة زيت
         window.deleteMaintenance = async function(id) {
@@ -898,6 +1153,35 @@
                         spareParts = spareParts.filter(s => s.id !== id);
                         renderTables();
                         Swal.fire('تم الحذف!', 'تم حذف تسجيل قطع الغيار بنجاح.', 'success');
+                    } catch (error) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'خطأ',
+                            text: 'حدث خطأ أثناء الحذف: ' + error.message
+                        });
+                    }
+                }
+            });
+        };
+
+        // حذف تأمين
+        window.deleteInsurance = async function(id) {
+            Swal.fire({
+                title: 'هل أنت متأكد؟',
+                text: 'سيتم حذف سجل التأمين!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'نعم، احذف!',
+                cancelButtonText: 'إلغاء'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    try {
+                        await remove(ref(database, 'insurances/' + id));
+                        insurances = insurances.filter(i => i.id !== id);
+                        renderTables();
+                        renderInsurancesTable();
+                        updateStats();
+                        Swal.fire('تم الحذف!', 'تم حذف التأمين بنجاح.', 'success');
                     } catch (error) {
                         Swal.fire({
                             icon: 'error',
