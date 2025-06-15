@@ -87,6 +87,7 @@
         .company-east-drelig { background-color: #E6E6FA; color: #4B0082; }
         .company-algeria-ham { background-color: #F0FFF0; color: #006400; }
         .company-ibrahim { background-color: #FFF0F5; color: #C71585; }
+        .company-personal { background-color: #E5E7EB; color: #1F2937; }
         .filter-btn {
             transition: all 0.3s;
             cursor: pointer;
@@ -95,6 +96,15 @@
             transform: scale(1.05);
             box-shadow: 0 0 0 2px currentColor;
         }
+        .insurance-type-badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+        .insurance-vehicle { background-color: #DBEAFE; color: #1E40AF; }
+        .insurance-goods { background-color: #D1FAE5; color: #065F46; }
     </style>
 </head>
 <body class="bg-gray-100">
@@ -164,7 +174,7 @@
             </div>
             <div class="bg-white p-4 rounded-lg shadow-lg stats-card">
                 <h3 class="text-lg font-semibold text-gray-700"><i class="fas fa-building mr-2"></i> عدد الشركات</h3>
-                <p id="totalCompanies" class="text-2xl font-bold text-indigo-600">4</p>
+                <p id="totalCompanies" class="text-2xl font-bold text-indigo-600">5</p>
             </div>
         </div>
 
@@ -197,6 +207,9 @@
                 </button>
                 <button data-company="ابراهيم" class="filter-btn bg-pink-100 text-pink-800 px-4 py-2 rounded-full">
                     ابراهيم
+                </button>
+                <button data-company="عتاد شخصي" class="filter-btn bg-gray-100 text-gray-800 px-4 py-2 rounded-full">
+                    عتاد شخصي
                 </button>
             </div>
         </div>
@@ -253,6 +266,8 @@
                 <thead>
                     <tr class="bg-yellow-600 text-white">
                         <th class="p-3">رقم التسجيل</th>
+                        <th class="p-3">نوع الزيت</th>
+                        <th class="p-3">ملاحظات الصيانة</th>
                         <th class="p-3">الملكية</th>
                         <th class="p-3">تاريخ تغيير الزيت</th>
                         <th class="p-3">عداد المركبة (كم)</th>
@@ -288,7 +303,7 @@
     <!-- واجهة التأمينات -->
     <div id="insurancesView" class="container mx-auto p-6 max-w-6xl hidden">
         <h1 class="text-3xl font-bold text-center text-gray-800 mb-6">
-            <i class="fas fa-shield-alt mr-2"></i> إدارة تأمينات المركبات
+            <i class="fas fa-shield-alt mr-2"></i> إدارة تأمينات المركبات والسلع
         </h1>
 
         <!-- فلترة البحث -->
@@ -299,6 +314,11 @@
                            class="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
                 <div class="flex space-x-2">
+                    <select id="insuranceTypeFilter" class="p-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="all">جميع الأنواع</option>
+                        <option value="تأمين مركبات">تأمين مركبات</option>
+                        <option value="تأمين سلع">تأمين سلع</option>
+                    </select>
                     <select id="insuranceStatusFilter" class="p-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
                         <option value="all">جميع الحالات</option>
                         <option value="active">فعال</option>
@@ -311,6 +331,7 @@
                         <option value="ايست دريليق">ايست دريليق</option>
                         <option value="الجيريا هام موتورز">الجيريا هام موتورز</option>
                         <option value="ابراهيم">ابراهيم</option>
+                        <option value="عتاد شخصي">عتاد شخصي</option>
                     </select>
                     <button id="resetInsuranceFilters" class="bg-gray-200 text-gray-700 p-3 rounded hover:bg-gray-300">
                         <i class="fas fa-redo mr-1"></i> إعادة تعيين
@@ -325,7 +346,8 @@
                 <thead>
                     <tr class="bg-blue-600 text-white">
                         <th class="p-3">رقم التسجيل</th>
-                        <th class="p-3">المركبة</th>
+                        <th class="p-3">نوع التأمين</th>
+                        <th class="p-3">المركبة/السلعة</th>
                         <th class="p-3">الملكية</th>
                         <th class="p-3">تاريخ البدء</th>
                         <th class="p-3">تاريخ الانتهاء</th>
@@ -563,6 +585,10 @@
                     <select id="swalVehicleType" class="swal2-select" required>
                         <option value="سيارة">سيارة</option>
                         <option value="شاحنة">شاحنة</option>
+                        <option value="آلة شوكية">آلة شوكية</option>
+                        <option value="مقطورة">مقطورة</option>
+                        <option value="سيارة تجارية FORGAN">سيارة تجارية FORGAN</option>
+                        <option value="جرار">جرار</option>
                     </select>
                     <select id="swalCompany" class="swal2-select" required>
                         <option value="">اختر الشركة المالكة</option>
@@ -570,6 +596,7 @@
                         <option value="ايست دريليق">ايست دريليق</option>
                         <option value="الجيريا هام موتورز">الجيريا هام موتورز</option>
                         <option value="ابراهيم">ابراهيم</option>
+                        <option value="عتاد شخصي">عتاد شخصي</option>
                     </select>
                 `,
                 focusConfirm: false,
@@ -619,9 +646,13 @@
             Swal.fire({
                 title: 'إضافة تأمين جديد',
                 html: `
-                    <select id="swalVehicleSelect" class="swal2-select" required>
-                        <option value="">اختر المركبة</option>
+                    <select id="swalVehicleSelect" class="swal2-select">
+                        <option value="">اختر المركبة (اختياري للسلع)</option>
                         ${vehicles.map(v => `<option value="${v.plateNumber}">${v.plateNumber} (${v.vehicleType})</option>`).join('')}
+                    </select>
+                    <select id="swalInsuranceType" class="swal2-select" required>
+                        <option value="تأمين مركبات">تأمين مركبات</option>
+                        <option value="تأمين سلع">تأمين سلع</option>
                     </select>
                     <input type="date" id="swalInsuranceStart" class="swal2-input" required>
                     <input type="date" id="swalInsuranceEnd" class="swal2-input" required>
@@ -633,12 +664,13 @@
                 preConfirm: async () => {
                     const insurance = {
                         plateNumber: document.getElementById('swalVehicleSelect').value,
+                        insuranceType: document.getElementById('swalInsuranceType').value,
                         startDate: document.getElementById('swalInsuranceStart').value,
                         endDate: document.getElementById('swalInsuranceEnd').value
                     };
 
-                    if (!insurance.plateNumber || !insurance.startDate || !insurance.endDate) {
-                        Swal.showValidationMessage('جميع الحقول مطلوبة');
+                    if (!insurance.startDate || !insurance.endDate) {
+                        Swal.showValidationMessage('تاريخ البداية والنهاية مطلوبان');
                         return false;
                     }
 
@@ -676,6 +708,8 @@
                         <option value="">اختر المركبة</option>
                         ${vehicles.map(v => `<option value="${v.plateNumber}">${v.plateNumber} (${v.vehicleType})</option>`).join('')}
                     </select>
+                    <input type="text" id="swalOilType" placeholder="نوع الزيت المضاف" class="swal2-input" required>
+                    <input type="text" id="swalMaintenanceNotes" placeholder="ملاحظة (القطع التي تم تغييرها)" class="swal2-input">
                     <input type="date" id="swalOilChangeDate" class="swal2-input" required>
                     <input type="number" id="swalCurrentMileage" placeholder="عداد المركبة الحالي (كم)" class="swal2-input" required>
                     <input type="number" id="swalNextMileage" placeholder="عداد تغيير الزيت القادم (كم)" class="swal2-input" required>
@@ -687,13 +721,15 @@
                 preConfirm: async () => {
                     const maintenance = {
                         plateNumber: document.getElementById('swalMaintenanceVehicleSelect').value,
+                        oilType: document.getElementById('swalOilType').value,
+                        maintenanceNotes: document.getElementById('swalMaintenanceNotes').value,
                         oilChangeDate: document.getElementById('swalOilChangeDate').value,
                         currentMileage: parseInt(document.getElementById('swalCurrentMileage').value),
                         nextMileage: parseInt(document.getElementById('swalNextMileage').value)
                     };
 
-                    if (!maintenance.plateNumber || !maintenance.oilChangeDate || !maintenance.currentMileage || !maintenance.nextMileage) {
-                        Swal.showValidationMessage('جميع الحقول مطلوبة');
+                    if (!maintenance.plateNumber || !maintenance.oilType || !maintenance.oilChangeDate || !maintenance.currentMileage || !maintenance.nextMileage) {
+                        Swal.showValidationMessage('جميع الحقول مطلوبة عدا الملاحظة');
                         return false;
                     }
 
@@ -830,12 +866,17 @@
                     <select id="editVehicleType" class="swal2-select">
                         <option value="سيارة" ${vehicle.vehicleType === 'سيارة' ? 'selected' : ''}>سيارة</option>
                         <option value="شاحنة" ${vehicle.vehicleType === 'شاحنة' ? 'selected' : ''}>شاحنة</option>
+                        <option value="آلة شوكية" ${vehicle.vehicleType === 'آلة شوكية' ? 'selected' : ''}>آلة شوكية</option>
+                        <option value="مقطورة" ${vehicle.vehicleType === 'مقطورة' ? 'selected' : ''}>مقطورة</option>
+                        <option value="سيارة تجارية FORGAN" ${vehicle.vehicleType === 'سيارة تجارية FORGAN' ? 'selected' : ''}>سيارة تجارية FORGAN</option>
+                        <option value="جرار" ${vehicle.vehicleType === 'جرار' ? 'selected' : ''}>جرار</option>
                     </select>
                     <select id="editCompany" class="swal2-select">
                         <option value="ابن عوف" ${vehicle.company === 'ابن عوف' ? 'selected' : ''}>ابن عوف</option>
                         <option value="ايست دريليق" ${vehicle.company === 'ايست دريليق' ? 'selected' : ''}>ايست دريليق</option>
                         <option value="الجيريا هام موتورز" ${vehicle.company === 'الجيريا هام موتورز' ? 'selected' : ''}>الجيريا هام موتورز</option>
                         <option value="ابراهيم" ${vehicle.company === 'ابراهيم' ? 'selected' : ''}>ابراهيم</option>
+                        <option value="عتاد شخصي" ${vehicle.company === 'عتاد شخصي' ? 'selected' : ''}>عتاد شخصي</option>
                     </select>
                 `,
                 showCancelButton: true,
@@ -882,6 +923,8 @@
                         <option value="">اختر المركبة</option>
                         ${vehicles.map(v => `<option value="${v.plateNumber}" ${maintenance.plateNumber === v.plateNumber ? 'selected' : ''}>${v.plateNumber} (${v.vehicleType})</option>`).join('')}
                     </select>
+                    <input id="editOilType" type="text" class="swal2-input" value="${maintenance.oilType || ''}" placeholder="نوع الزيت">
+                    <input id="editMaintenanceNotes" type="text" class="swal2-input" value="${maintenance.maintenanceNotes || ''}" placeholder="ملاحظات الصيانة">
                     <input id="editOilChangeDate" type="date" class="swal2-input" value="${maintenance.oilChangeDate}">
                     <input id="editCurrentMileage" type="number" class="swal2-input" value="${maintenance.currentMileage}" placeholder="عداد المركبة الحالي (كم)">
                     <input id="editNextMileage" type="number" class="swal2-input" value="${maintenance.nextMileage}" placeholder="عداد التغيير القادم (كم)">
@@ -892,6 +935,8 @@
                 preConfirm: async () => {
                     const updatedMaintenance = {
                         plateNumber: document.getElementById('editMaintenancePlate').value,
+                        oilType: document.getElementById('editOilType').value,
+                        maintenanceNotes: document.getElementById('editMaintenanceNotes').value,
                         oilChangeDate: document.getElementById('editOilChangeDate').value,
                         currentMileage: parseInt(document.getElementById('editCurrentMileage').value),
                         nextMileage: parseInt(document.getElementById('editNextMileage').value)
@@ -966,8 +1011,12 @@
                 title: 'تعديل التأمين',
                 html: `
                     <select id="editInsurancePlate" class="swal2-select">
-                        <option value="">اختر المركبة</option>
+                        <option value="">اختر المركبة (اختياري للسلع)</option>
                         ${vehicles.map(v => `<option value="${v.plateNumber}" ${insurance.plateNumber === v.plateNumber ? 'selected' : ''}>${v.plateNumber} (${v.vehicleType})</option>`).join('')}
+                    </select>
+                    <select id="editInsuranceType" class="swal2-select">
+                        <option value="تأمين مركبات" ${insurance.insuranceType === 'تأمين مركبات' ? 'selected' : ''}>تأمين مركبات</option>
+                        <option value="تأمين سلع" ${insurance.insuranceType === 'تأمين سلع' ? 'selected' : ''}>تأمين سلع</option>
                     </select>
                     <input type="date" id="editInsuranceStart" class="swal2-input" value="${insurance.startDate}">
                     <input type="date" id="editInsuranceEnd" class="swal2-input" value="${insurance.endDate}">
@@ -978,6 +1027,7 @@
                 preConfirm: async () => {
                     const updatedInsurance = {
                         plateNumber: document.getElementById('editInsurancePlate').value,
+                        insuranceType: document.getElementById('editInsuranceType').value,
                         startDate: document.getElementById('editInsuranceStart').value,
                         endDate: document.getElementById('editInsuranceEnd').value
                     };
@@ -1027,6 +1077,8 @@
                     'الأيام المتبقية': insurance ? getDaysRemaining(insurance.endDate) : '-',
                     'حالة التأمين': insurance ? (getDaysRemaining(insurance.endDate) <= 0 ? 'منتهي' : getDaysRemaining(insurance.endDate) <= 7 ? 'قريب من الانتهاء' : 'فعال') : '-',
                     'تاريخ تغيير الزيت': maintenance.length ? maintenance.map(m => m.oilChangeDate).join(', ') : '-',
+                    'نوع الزيت': maintenance.length ? maintenance.map(m => m.oilType).join(', ') : '-',
+                    'ملاحظات الصيانة': maintenance.length ? maintenance.map(m => m.maintenanceNotes).join(', ') : '-',
                     'عداد المركبة (كم)': maintenance.length ? maintenance.map(m => m.currentMileage).join(', ') : '-',
                     'عداد التغيير القادم (كم)': maintenance.length ? maintenance.map(m => m.nextMileage).join(', ') : '-',
                     'تاريخ صيانة قطع الغيار': sparePart.length ? sparePart.map(s => s.sparePartsDate).join(', ') : '-',
@@ -1045,10 +1097,12 @@
         document.getElementById('maintenanceSearch').addEventListener('input', () => renderTables());
         document.getElementById('sparePartsSearch').addEventListener('input', () => renderTables());
         document.getElementById('insuranceSearch').addEventListener('input', () => renderInsurancesTable());
+        document.getElementById('insuranceTypeFilter').addEventListener('change', () => renderInsurancesTable());
         document.getElementById('insuranceStatusFilter').addEventListener('change', () => renderInsurancesTable());
         document.getElementById('insuranceCompanyFilter').addEventListener('change', () => renderInsurancesTable());
         document.getElementById('resetInsuranceFilters').addEventListener('click', () => {
             document.getElementById('insuranceSearch').value = '';
+            document.getElementById('insuranceTypeFilter').value = 'all';
             document.getElementById('insuranceStatusFilter').value = 'all';
             document.getElementById('insuranceCompanyFilter').value = 'all';
             renderInsurancesTable();
@@ -1060,6 +1114,15 @@
                 case 'ايست دريليق': return 'company-east-drelig';
                 case 'الجيريا هام موتورز': return 'company-algeria-ham';
                 case 'ابراهيم': return 'company-ibrahim';
+                case 'عتاد شخصي': return 'company-personal';
+                default: return 'bg-gray-100 text-gray-800';
+            }
+        }
+
+        function getInsuranceTypeBadge(type) {
+            switch(type) {
+                case 'تأمين مركبات': return 'insurance-vehicle';
+                case 'تأمين سلع': return 'insurance-goods';
                 default: return 'bg-gray-100 text-gray-800';
             }
         }
@@ -1138,6 +1201,8 @@
                     const row = document.createElement('tr');
                     row.innerHTML = `
                         <td class="p-3">${maintenance.plateNumber}</td>
+                        <td class="p-3">${maintenance.oilType || '-'}</td>
+                        <td class="p-3">${maintenance.maintenanceNotes || '-'}</td>
                         <td class="p-3">
                             ${vehicle ? `
                                 <span class="company-badge ${getCompanyBadgeClass(vehicle.company)}">
@@ -1200,6 +1265,7 @@
 
         function renderInsurancesTable() {
             const searchTerm = document.getElementById('insuranceSearch').value.toLowerCase();
+            const typeFilter = document.getElementById('insuranceTypeFilter').value;
             const statusFilter = document.getElementById('insuranceStatusFilter').value;
             const companyFilter = document.getElementById('insuranceCompanyFilter').value;
 
@@ -1207,7 +1273,13 @@
             insurancesTableBody.innerHTML = '';
 
             insurances
-                .filter(ins => ins.plateNumber.toLowerCase().includes(searchTerm))
+                .filter(ins => 
+                    ins.plateNumber ? ins.plateNumber.toLowerCase().includes(searchTerm) : 
+                    ins.insuranceType === 'تأمين سلع' && 'تأمين سلع'.includes(searchTerm))
+                .filter(ins => {
+                    if (typeFilter === 'all') return true;
+                    return ins.insuranceType === typeFilter;
+                })
                 .filter(ins => {
                     if (statusFilter === 'all') return true;
                     const daysRemaining = getDaysRemaining(ins.endDate);
@@ -1218,6 +1290,7 @@
                 })
                 .filter(ins => {
                     if (companyFilter === 'all') return true;
+                    if (!ins.plateNumber) return companyFilter === 'عتاد شخصي';
                     const vehicle = vehicles.find(v => v.plateNumber === ins.plateNumber);
                     return vehicle && vehicle.company === companyFilter;
                 })
@@ -1246,14 +1319,19 @@
                     }
 
                     row.innerHTML = `
-                        <td class="p-3">${insurance.plateNumber}</td>
+                        <td class="p-3">${insurance.plateNumber || 'تأمين سلع'}</td>
+                        <td class="p-3">
+                            <span class="insurance-type-badge ${getInsuranceTypeBadge(insurance.insuranceType)}">
+                                ${insurance.insuranceType || 'تأمين مركبات'}
+                            </span>
+                        </td>
                         <td class="p-3">${vehicle ? `${vehicle.brand} ${vehicle.model}` : 'غير معروف'}</td>
                         <td class="p-3">
                             ${vehicle ? `
                                 <span class="company-badge ${getCompanyBadgeClass(vehicle.company)}">
                                     ${vehicle.company}
                                 </span>
-                            ` : '-'}
+                            ` : insurance.plateNumber ? 'غير معروف' : 'عتاد شخصي'}
                         </td>
                         <td class="p-3">${insurance.startDate}</td>
                         <td class="p-3">${insurance.endDate}</td>
@@ -1369,14 +1447,16 @@
                 return acc;
             }, {});
 
+            const vehicleTypeLabels = ['سيارة', 'شاحنة', 'آلة شوكية', 'مقطورة', 'سيارة تجارية FORGAN', 'جرار'];
+            
             vehicleTypeChart = new Chart(document.getElementById('vehicleTypeChart'), {
                 type: 'bar',
                 data: {
-                    labels: ['سيارة', 'شاحنة'],
+                    labels: vehicleTypeLabels,
                     datasets: [{
                         label: 'عدد المركبات',
-                        data: [vehicleTypes['سيارة'] || 0, vehicleTypes['شاحنة'] || 0],
-                        backgroundColor: ['#3498db', '#e74c3c']
+                        data: vehicleTypeLabels.map(type => vehicleTypes[type] || 0),
+                        backgroundColor: ['#3498db', '#e74c3c', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c']
                     }]
                 },
                 options: {
@@ -1438,7 +1518,8 @@
                 'ابن عوف': '#FFE4E1',
                 'ايست دريليق': '#E6E6FA',
                 'الجيريا هام موتورز': '#F0FFF0',
-                'ابراهيم': '#FFF0F5'
+                'ابراهيم': '#FFF0F5',
+                'عتاد شخصي': '#E5E7EB'
             };
 
             companyDistributionChart = new Chart(document.getElementById('companyDistributionChart'), {
@@ -1462,7 +1543,7 @@
 
             // رسم بياني لحالة التأمينات حسب الشركة
             const insuranceByCompany = {};
-            const companies = ['ابن عوف', 'ايست دريليق', 'الجيريا هام موتورز', 'ابراهيم'];
+            const companies = ['ابن عوف', 'ايست دريليق', 'الجيريا هام موتورز', 'ابراهيم', 'عتاد شخصي'];
             
             companies.forEach(company => {
                 insuranceByCompany[company] = {
@@ -1473,15 +1554,20 @@
             });
 
             insurances.forEach(ins => {
-                const vehicle = vehicles.find(v => v.plateNumber === ins.plateNumber);
-                if (vehicle && vehicle.company) {
+                let company = 'عتاد شخصي';
+                if (ins.plateNumber) {
+                    const vehicle = vehicles.find(v => v.plateNumber === ins.plateNumber);
+                    company = vehicle?.company || 'غير معروف';
+                }
+                
+                if (insuranceByCompany[company]) {
                     const daysRemaining = getDaysRemaining(ins.endDate);
                     if (daysRemaining <= 0) {
-                        insuranceByCompany[vehicle.company].expired++;
+                        insuranceByCompany[company].expired++;
                     } else if (daysRemaining <= 7) {
-                        insuranceByCompany[vehicle.company].expiringSoon++;
+                        insuranceByCompany[company].expiringSoon++;
                     } else {
-                        insuranceByCompany[vehicle.company].active++;
+                        insuranceByCompany[company].active++;
                     }
                 }
             });
