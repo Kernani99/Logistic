@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -106,6 +105,11 @@
         }
         .insurance-vehicle { background-color: #DBEAFE; color: #1E40AF; }
         .insurance-goods { background-color: #D1FAE5; color: #065F46; }
+        .monthly-total {
+            background-color: #f8f9fa;
+            font-weight: bold;
+            border-top: 2px solid #dee2e6;
+        }
     </style>
 </head>
 <body class="bg-gray-100">
@@ -293,10 +297,14 @@
                         <th class="p-3">الملكية</th>
                         <th class="p-3">تاريخ الصيانة</th>
                         <th class="p-3">ملاحظة (الغيار الذي تم تغييره)</th>
+                        <th class="p-3">السعر (دج)</th>
                         <th class="p-3">إجراءات</th>
                     </tr>
                 </thead>
                 <tbody id="sparePartsTableBody"></tbody>
+                <tfoot id="monthlyTotalRow">
+                    <!-- سيتم إضافة صف الإجمالي الشهري هنا عبر الجافاسكربت -->
+                </tfoot>
             </table>
         </div>
     </div>
@@ -769,6 +777,7 @@
                     </select>
                     <input type="date" id="swalSparePartsDate" class="swal2-input" required>
                     <input type="text" id="swalSparePartsNote" placeholder="ملاحظة (الغيار الذي تم تغييره)" class="swal2-input" required>
+                    <input type="number" id="swalSparePartsPrice" placeholder="السعر (دج)" class="swal2-input" required>
                 `,
                 focusConfirm: false,
                 showCancelButton: true,
@@ -778,10 +787,11 @@
                     const sparePart = {
                         plateNumber: document.getElementById('swalSparePartsVehicleSelect').value,
                         sparePartsDate: document.getElementById('swalSparePartsDate').value,
-                        sparePartsNote: document.getElementById('swalSparePartsNote').value
+                        sparePartsNote: document.getElementById('swalSparePartsNote').value,
+                        price: parseInt(document.getElementById('swalSparePartsPrice').value) || 0
                     };
 
-                    if (!sparePart.plateNumber || !sparePart.sparePartsDate || !sparePart.sparePartsNote) {
+                    if (!sparePart.plateNumber || !sparePart.sparePartsDate || !sparePart.sparePartsNote || !sparePart.price) {
                         Swal.showValidationMessage('جميع الحقول مطلوبة');
                         return false;
                     }
@@ -975,6 +985,7 @@
                     </select>
                     <input type="date" id="editSparePartsDate" class="swal2-input" value="${sparePart.sparePartsDate}">
                     <input type="text" id="editSparePartsNote" class="swal2-input" value="${sparePart.sparePartsNote}" placeholder="ملاحظة">
+                    <input type="number" id="editSparePartsPrice" class="swal2-input" value="${sparePart.price || 0}" placeholder="السعر (دج)">
                 `,
                 showCancelButton: true,
                 confirmButtonText: 'حفظ',
@@ -983,7 +994,8 @@
                     const updatedSparePart = {
                         plateNumber: document.getElementById('editSparePartPlate').value,
                         sparePartsDate: document.getElementById('editSparePartsDate').value,
-                        sparePartsNote: document.getElementById('editSparePartsNote').value
+                        sparePartsNote: document.getElementById('editSparePartsNote').value,
+                        price: parseInt(document.getElementById('editSparePartsPrice').value) || 0
                     };
 
                     try {
@@ -1083,7 +1095,8 @@
                     'عداد المركبة (كم)': maintenance.length ? maintenance.map(m => m.currentMileage).join(', ') : '-',
                     'عداد التغيير القادم (كم)': maintenance.length ? maintenance.map(m => m.nextMileage).join(', ') : '-',
                     'تاريخ صيانة قطع الغيار': sparePart.length ? sparePart.map(s => s.sparePartsDate).join(', ') : '-',
-                    'ملاحظة قطع الغيار': sparePart.length ? sparePart.map(s => s.sparePartsNote).join(', ') : '-'
+                    'ملاحظة قطع الغيار': sparePart.length ? sparePart.map(s => s.sparePartsNote).join(', ') : '-',
+                    'سعر قطع الغيار': sparePart.length ? sparePart.map(s => s.price ? `${s.price} دج` : '-').join(', ') : '-'
                 };
             });
 
@@ -1230,38 +1243,62 @@
             const sparePartsTableBody = document.getElementById('sparePartsTableBody');
             sparePartsTableBody.innerHTML = '';
             
-            spareParts
+            const filteredSpareParts = spareParts
                 .filter(s => s.plateNumber.toLowerCase().includes(sparePartsSearch))
                 .filter(s => {
                     if (currentCompanyFilter === 'all') return true;
                     const vehicle = vehicles.find(v => v.plateNumber === s.plateNumber);
                     return vehicle && vehicle.company === currentCompanyFilter;
-                })
-                .forEach(sparePart => {
-                    const vehicle = vehicles.find(v => v.plateNumber === sparePart.plateNumber);
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td class="p-3">${sparePart.plateNumber}</td>
-                        <td class="p-3">
-                            ${vehicle ? `
-                                <span class="company-badge ${getCompanyBadgeClass(vehicle.company)}">
-                                    ${vehicle.company}
-                                </span>
-                            ` : '-'}
-                        </td>
-                        <td class="p-3">${sparePart.sparePartsDate}</td>
-                        <td class="p-3">${sparePart.sparePartsNote}</td>
-                        <td class="p-3">
-                            <button onclick="editSparePart('${sparePart.id}')" class="action-btn text-blue-600 hover:text-blue-800 mr-2">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button onclick="deleteSparePart('${sparePart.id}')" class="action-btn text-red-600 hover:text-red-800">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </td>
-                    `;
-                    sparePartsTableBody.appendChild(row);
                 });
+
+            // حساب الإجمالي الشهري
+            const currentMonth = new Date().getMonth() + 1;
+            const currentYear = new Date().getFullYear();
+            const monthlyTotal = filteredSpareParts.reduce((total, part) => {
+                const partDate = new Date(part.sparePartsDate);
+                if (partDate.getMonth() + 1 === currentMonth && partDate.getFullYear() === currentYear) {
+                    return total + (part.price || 0);
+                }
+                return total;
+            }, 0);
+
+            // عرض بيانات قطع الغيار
+            filteredSpareParts.forEach(sparePart => {
+                const vehicle = vehicles.find(v => v.plateNumber === sparePart.plateNumber);
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="p-3">${sparePart.plateNumber}</td>
+                    <td class="p-3">
+                        ${vehicle ? `
+                            <span class="company-badge ${getCompanyBadgeClass(vehicle.company)}">
+                                ${vehicle.company}
+                            </span>
+                        ` : '-'}
+                    </td>
+                    <td class="p-3">${sparePart.sparePartsDate}</td>
+                    <td class="p-3">${sparePart.sparePartsNote}</td>
+                    <td class="p-3">${sparePart.price ? sparePart.price + ' دج' : '-'}</td>
+                    <td class="p-3">
+                        <button onclick="editSparePart('${sparePart.id}')" class="action-btn text-blue-600 hover:text-blue-800 mr-2">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button onclick="deleteSparePart('${sparePart.id}')" class="action-btn text-red-600 hover:text-red-800">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                sparePartsTableBody.appendChild(row);
+            });
+
+            // إضافة صف الإجمالي الشهري
+            const monthlyTotalRow = document.getElementById('monthlyTotalRow');
+            monthlyTotalRow.innerHTML = `
+                <tr class="monthly-total">
+                    <td class="p-3" colspan="4" style="text-align: left;">الإجمالي الشهري:</td>
+                    <td class="p-3">${monthlyTotal} دج</td>
+                    <td class="p-3"></td>
+                </tr>
+            `;
         }
 
         function renderInsurancesTable() {
