@@ -2223,17 +2223,15 @@
                         Swal.showValidationMessage('حدث خطأ أثناء الإضافة: ' + error.message);
                         return false;
                     }
-                }
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'تمت الإضافة',
-                        text: 'تم إضافة صيانة قطع الغيار بنجاح!'
-                    });
-                }
-            });
-        };
+               }).then((result) => {
+    if (result.isConfirmed) {
+        Swal.fire({
+            icon: 'success',
+            title: 'تمت الإضافة',
+            text: 'تم إضافة صيانة قطع الغيار بنجاح!'
+        });
+    }
+});
 
         window.editSparePart = async (id) => {
             const sparePartToEdit = spareParts.find(sp => sp.id === id);
