@@ -123,17 +123,38 @@
             background-color: #4b5563;
             transform: translateY(-2px);
         }
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+        .pagination-btn {
+            padding: 0.5rem 1rem;
+            margin: 0 0.25rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.25rem;
+            cursor: pointer;
+        }
+        .pagination-btn.active {
+            background-color: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
         @media print {
             .no-print {
                 display: none !important;
             }
-            body {
-                background-color: white !important;
-                color: black !important;
+            body, body * {
+                visibility: hidden;
             }
-            table {
-                width: 100% !important;
-                font-size: 12px !important;
+            #printableArea, #printableArea * {
+                visibility: visible;
+            }
+            #printableArea {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
             }
             .bg-blue-600, .bg-yellow-600, .bg-indigo-600, .bg-red-600 {
                 color: white !important;
@@ -151,23 +172,22 @@
                 <img src="https://brandlogos.net/wp-content/uploads/2022/10/sym_-_sanyang_motor-logo_brandlogos.net_mre4v.png" alt="Logo" class="h-12 w-auto">
                 <span class="text-xl font-bold hidden md:block">نظام إدارة المركبات</span>
             </div>
-           <div class="flex items-center space-x-4">
-    <button id="dashboardNav" class="hover:text-blue-300 px-3 py-1 rounded transition">
-        <i class="fas fa-car mr-1"></i> <span class="hidden md:inline">لوحة التحكم</span>
-    </button>
-    <button id="insurancesNav" class="hover:text-blue-300 px-3 py-1 rounded transition">
-        <i class="fas fa-shield-alt mr-1"></i> <span class="hidden md:inline">التأمينات</span>
-    </button>
-    <a href="/SCANER" class="hover:text-blue-300 px-3 py-1 rounded transition">
-        <i class="fas fa-camera-retro mr-1"></i> <span class="hidden md:inline">تأمين السيارات</span>
-    </a>
-    <button id="darkModeToggle" class="text-white hover:text-blue-300 p-2 rounded-full">
-        <i class="fas fa-moon"></i>
-    </button>
-    <button id="logout" class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded transition">
-        <i class="fas fa-sign-out-alt mr-1"></i> <span class="hidden md:inline">تسجيل الخروج</span>
-    </button>
-</div>
+            <div class="flex items-center space-x-4">
+                <button id="dashboardNav" class="hover:text-blue-300 px-3 py-1 rounded transition">
+                    <i class="fas fa-car mr-1"></i> <span class="hidden md:inline">لوحة التحكم</span>
+                </button>
+                <button id="insurancesNav" class="hover:text-blue-300 px-3 py-1 rounded transition">
+                    <i class="fas fa-shield-alt mr-1"></i> <span class="hidden md:inline">التأمينات</span>
+                </button>
+                <a href="/SCANER" class="hover:text-blue-300 px-3 py-1 rounded transition">
+                    <i class="fas fa-camera-retro mr-1"></i> <span class="hidden md:inline">تأمين السيارات</span>
+                </a>
+                <button id="darkModeToggle" class="text-white hover:text-blue-300 p-2 rounded-full">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <button id="logout" class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded transition">
+                    <i class="fas fa-sign-out-alt mr-1"></i> <span class="hidden md:inline">تسجيل الخروج</span>
+                </button>
             </div>
         </div>
     </nav>
@@ -282,24 +302,27 @@
                 </div>
             </div>
             <div id="vehiclesTable">
-                <table class="w-full border-collapse">
-                    <thead>
-                        <tr class="bg-blue-600 text-white">
-                            <th class="p-3">العلامة</th>
-                            <th class="p-3">النوع</th>
-                            <th class="p-3">رقم التسجيل</th>
-                            <th class="p-3">السائق</th>
-                            <th class="p-3">نوع المركبة</th>
-                            <th class="p-3">الملكية</th>
-                            <th class="p-3">تاريخ بداية التأمين</th>
-                            <th class="p-3">تاريخ نهاية التأمين</th>
-                            <th class="p-3">الأيام المتبقية</th>
-                            <th class="p-3">الحالة</th>
-                            <th class="p-3 no-print">إجراءات</th>
-                        </tr>
-                    </thead>
-                    <tbody id="vehiclesTableBody"></tbody>
-                </table>
+                <div id="printableArea">
+                    <table class="w-full border-collapse">
+                        <thead>
+                            <tr class="bg-blue-600 text-white">
+                                <th class="p-3">العلامة</th>
+                                <th class="p-3">النوع</th>
+                                <th class="p-3">رقم التسجيل</th>
+                                <th class="p-3">السائق</th>
+                                <th class="p-3">نوع المركبة</th>
+                                <th class="p-3">الملكية</th>
+                                <th class="p-3">تاريخ بداية التأمين</th>
+                                <th class="p-3">تاريخ نهاية التأمين</th>
+                                <th class="p-3">الأيام المتبقية</th>
+                                <th class="p-3">الحالة</th>
+                                <th class="p-3 no-print">إجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="vehiclesTableBody"></tbody>
+                    </table>
+                </div>
+                <div id="vehiclesPagination" class="pagination no-print mt-4"></div>
             </div>
         </div>
 
@@ -486,23 +509,70 @@
         let inspections = [];
         let spareParts = [];
         let currentCompanyFilter = 'all';
+        let currentVehiclePage = 1;
+        const vehiclesPerPage = 20;
 
-        // دالة الطباعة
+        // دالة الطباعة المحسنة
         function printTable(tableId, title) {
-            const printContents = document.getElementById(tableId).innerHTML;
-            const originalContents = document.body.innerHTML;
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                <head>
+                    <title>${title}</title>
+                    <style>
+                        body { font-family: 'Cairo', sans-serif; direction: rtl; }
+                        table { width: 100%; border-collapse: collapse; }
+                        th, td { padding: 8px; border: 1px solid #ddd; text-align: right; }
+                        th { background-color: #3b82f6; color: white; }
+                        .expired { background-color: #fee2e2; }
+                        .warning { background-color: #fef3c7; }
+                        .print-title { text-align: center; margin-bottom: 20px; font-size: 18px; font-weight: bold; }
+                        .print-date { text-align: left; margin-top: 20px; font-size: 12px; }
+                    </style>
+                </head>
+                <body>
+                    <h1 class="print-title">${title}</h1>
+                    ${document.getElementById(tableId).innerHTML}
+                    <div class="print-date">تم الطباعة في: ${new Date().toLocaleString()}</div>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+            printWindow.focus();
+            setTimeout(() => {
+                printWindow.print();
+                printWindow.close();
+            }, 500);
+        }
+
+        // دالة إنشاء التقسيم (Pagination)
+        function setupPagination(items, wrapper, rowsPerPage, currentPage, renderFunction) {
+            wrapper.innerHTML = '';
+            const pageCount = Math.ceil(items.length / rowsPerPage);
             
-            document.body.innerHTML = `
-                <h1 style="text-align: center; margin-bottom: 20px;">${title}</h1>
-                ${printContents}
-                <div style="text-align: left; margin-top: 20px; font-size: 12px;">
-                    تم الطباعة في: ${new Date().toLocaleString()}
-                </div>
-            `;
+            if (pageCount <= 1) return;
             
-            window.print();
-            document.body.innerHTML = originalContents;
-            location.reload();
+            for (let i = 1; i <= pageCount; i++) {
+                const btn = document.createElement('button');
+                btn.innerText = i;
+                btn.classList.add('pagination-btn');
+                if (i === currentPage) {
+                    btn.classList.add('active');
+                }
+                
+                btn.addEventListener('click', () => {
+                    currentPage = i;
+                    renderFunction(items, currentPage);
+                    
+                    const currentBtn = wrapper.querySelector('.active');
+                    if (currentBtn) {
+                        currentBtn.classList.remove('active');
+                    }
+                    btn.classList.add('active');
+                });
+                
+                wrapper.appendChild(btn);
+            }
         }
 
         function showView(view) {
@@ -668,6 +738,7 @@
                 document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 currentCompanyFilter = btn.dataset.company;
+                currentVehiclePage = 1; // العودة إلى الصفحة الأولى عند تغيير الفلتر
                 renderTables();
             });
         });
@@ -1316,7 +1387,10 @@
         });
 
         // فلترة الجداول
-        document.getElementById('vehicleSearch').addEventListener('input', () => renderTables());
+        document.getElementById('vehicleSearch').addEventListener('input', () => {
+            currentVehiclePage = 1;
+            renderTables();
+        });
         document.getElementById('maintenanceSearch').addEventListener('input', () => renderTables());
         document.getElementById('inspectionSearch').addEventListener('input', () => renderTables());
         document.getElementById('sparePartsSearch').addEventListener('input', () => renderTables());
@@ -1357,58 +1431,67 @@
             const inspectionSearch = document.getElementById('inspectionSearch').value.toLowerCase();
             const sparePartsSearch = document.getElementById('sparePartsSearch').value.toLowerCase();
 
-            // جدول المركبات
+            // تصفية المركبات حسب البحث والشركة
+            const filteredVehicles = vehicles
+                .filter(v => v.plateNumber.toLowerCase().includes(vehicleSearch))
+                .filter(v => currentCompanyFilter === 'all' || v.company === currentCompanyFilter);
+
+            // جدول المركبات مع التقسيم
             const vehiclesTableBody = document.getElementById('vehiclesTableBody');
             vehiclesTableBody.innerHTML = '';
             
-            vehicles
-                .filter(v => v.plateNumber.toLowerCase().includes(vehicleSearch))
-                .filter(v => currentCompanyFilter === 'all' || v.company === currentCompanyFilter)
-                .forEach(vehicle => {
-                    const insurance = insurances.find(ins => ins.plateNumber === vehicle.plateNumber);
-                    const row = document.createElement('tr');
-                    let daysRemaining = '-';
-                    let status = '-';
+            const startIndex = (currentVehiclePage - 1) * vehiclesPerPage;
+            const paginatedVehicles = filteredVehicles.slice(startIndex, startIndex + vehiclesPerPage);
+            
+            paginatedVehicles.forEach(vehicle => {
+                const insurance = insurances.find(ins => ins.plateNumber === vehicle.plateNumber);
+                const row = document.createElement('tr');
+                let daysRemaining = '-';
+                let status = '-';
 
-                    if (insurance) {
-                        daysRemaining = getDaysRemaining(insurance.endDate);
-                        if (daysRemaining <= 0) {
-                            status = 'منتهي';
-                            row.classList.add('expired');
-                        } else if (daysRemaining <= 7) {
-                            status = 'قريب من الانتهاء';
-                            row.classList.add('warning');
-                        } else {
-                            status = 'فعال';
-                        }
+                if (insurance) {
+                    daysRemaining = getDaysRemaining(insurance.endDate);
+                    if (daysRemaining <= 0) {
+                        status = 'منتهي';
+                        row.classList.add('expired');
+                    } else if (daysRemaining <= 7) {
+                        status = 'قريب من الانتهاء';
+                        row.classList.add('warning');
+                    } else {
+                        status = 'فعال';
                     }
+                }
 
-                    row.innerHTML = `
-                        <td class="p-3">${vehicle.brand}</td>
-                        <td class="p-3">${vehicle.model}</td>
-                        <td class="p-3">${vehicle.plateNumber}</td>
-                        <td class="p-3">${vehicle.driverName}</td>
-                        <td class="p-3">${vehicle.vehicleType}</td>
-                        <td class="p-3">
-                            <span class="company-badge ${getCompanyBadgeClass(vehicle.company)}">
-                                ${vehicle.company}
-                            </span>
-                        </td>
-                        <td class="p-3">${insurance ? insurance.startDate : '-'}</td>
-                        <td class="p-3">${insurance ? insurance.endDate : '-'}</td>
-                        <td class="text-center p-3">${daysRemaining}</td>
-                        <td class="text-center p-3">${status}</td>
-                        <td class="p-3 no-print">
-                            <button onclick="editVehicle('${vehicle.id}')" class="action-btn text-blue-600 hover:text-blue-800 mr-2">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button onclick="deleteVehicle('${vehicle.id}')" class="action-btn text-red-600 hover:text-red-800">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </td>
-                    `;
-                    vehiclesTableBody.appendChild(row);
-                });
+                row.innerHTML = `
+                    <td class="p-3">${vehicle.brand}</td>
+                    <td class="p-3">${vehicle.model}</td>
+                    <td class="p-3">${vehicle.plateNumber}</td>
+                    <td class="p-3">${vehicle.driverName}</td>
+                    <td class="p-3">${vehicle.vehicleType}</td>
+                    <td class="p-3">
+                        <span class="company-badge ${getCompanyBadgeClass(vehicle.company)}">
+                            ${vehicle.company}
+                        </span>
+                    </td>
+                    <td class="p-3">${insurance ? insurance.startDate : '-'}</td>
+                    <td class="p-3">${insurance ? insurance.endDate : '-'}</td>
+                    <td class="text-center p-3">${daysRemaining}</td>
+                    <td class="text-center p-3">${status}</td>
+                    <td class="p-3 no-print">
+                        <button onclick="editVehicle('${vehicle.id}')" class="action-btn text-blue-600 hover:text-blue-800 mr-2">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button onclick="deleteVehicle('${vehicle.id}')" class="action-btn text-red-600 hover:text-red-800">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                vehiclesTableBody.appendChild(row);
+            });
+
+            // إعداد التقسيم (Pagination) لجدول المركبات
+            const paginationContainer = document.getElementById('vehiclesPagination');
+            setupPagination(filteredVehicles, paginationContainer, vehiclesPerPage, currentVehiclePage, renderVehiclePage);
 
             // جدول صيانة الزيوت
             const maintenanceTableBody = document.getElementById('maintenanceTableBody');
@@ -1567,6 +1650,61 @@
                     <td class="p-3 no-print"></td>
                 </tr>
             `;
+        }
+
+        // دالة لعرض صفحة محددة من المركبات
+        function renderVehiclePage(filteredVehicles, page) {
+            const vehiclesTableBody = document.getElementById('vehiclesTableBody');
+            vehiclesTableBody.innerHTML = '';
+            
+            const startIndex = (page - 1) * vehiclesPerPage;
+            const paginatedVehicles = filteredVehicles.slice(startIndex, startIndex + vehiclesPerPage);
+            
+            paginatedVehicles.forEach(vehicle => {
+                const insurance = insurances.find(ins => ins.plateNumber === vehicle.plateNumber);
+                const row = document.createElement('tr');
+                let daysRemaining = '-';
+                let status = '-';
+
+                if (insurance) {
+                    daysRemaining = getDaysRemaining(insurance.endDate);
+                    if (daysRemaining <= 0) {
+                        status = 'منتهي';
+                        row.classList.add('expired');
+                    } else if (daysRemaining <= 7) {
+                        status = 'قريب من الانتهاء';
+                        row.classList.add('warning');
+                    } else {
+                        status = 'فعال';
+                    }
+                }
+
+                row.innerHTML = `
+                    <td class="p-3">${vehicle.brand}</td>
+                    <td class="p-3">${vehicle.model}</td>
+                    <td class="p-3">${vehicle.plateNumber}</td>
+                    <td class="p-3">${vehicle.driverName}</td>
+                    <td class="p-3">${vehicle.vehicleType}</td>
+                    <td class="p-3">
+                        <span class="company-badge ${getCompanyBadgeClass(vehicle.company)}">
+                            ${vehicle.company}
+                        </span>
+                    </td>
+                    <td class="p-3">${insurance ? insurance.startDate : '-'}</td>
+                    <td class="p-3">${insurance ? insurance.endDate : '-'}</td>
+                    <td class="text-center p-3">${daysRemaining}</td>
+                    <td class="text-center p-3">${status}</td>
+                    <td class="p-3 no-print">
+                        <button onclick="editVehicle('${vehicle.id}')" class="action-btn text-blue-600 hover:text-blue-800 mr-2">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button onclick="deleteVehicle('${vehicle.id}')" class="action-btn text-red-600 hover:text-red-800">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                vehiclesTableBody.appendChild(row);
+            });
         }
 
         function renderInsurancesTable() {
