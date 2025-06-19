@@ -9,7 +9,6 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
         body {
             font-family: 'Cairo', sans-serif;
@@ -127,9 +126,6 @@
                 <button id="insurancesNav" class="hover:text-blue-300 px-3 py-1 rounded transition">
                     <i class="fas fa-shield-alt mr-1"></i> <span class="hidden md:inline">التأمينات</span>
                 </button>
-                <button id="statsNav" class="hover:text-blue-300 px-3 py-1 rounded transition">
-                    <i class="fas fa-chart-bar mr-1"></i> <span class="hidden md:inline">الإحصائيات</span>
-                </button>
                 <button id="darkModeToggle" class="text-white hover:text-blue-300 p-2 rounded-full">
                     <i class="fas fa-moon"></i>
                 </button>
@@ -178,8 +174,8 @@
                 <p id="upcomingMaintenances" class="text-2xl font-bold text-orange-600">0</p>
             </div>
             <div class="bg-white p-4 rounded-lg shadow-lg stats-card">
-                <h3 class="text-lg font-semibold text-gray-700"><i class="fas fa-building mr-2"></i> عدد الشركات</h3>
-                <p id="totalCompanies" class="text-2xl font-bold text-indigo-600">5</p>
+                <h3 class="text-lg font-semibold text-gray-700"><i class="fas fa-car-crash mr-2"></i> المراقبة التقنية القريبة</h3>
+                <p id="upcomingInspections" class="text-2xl font-bold text-indigo-600">0</p>
             </div>
         </div>
 
@@ -230,7 +226,10 @@
             <button id="addMaintenanceBtn" class="floating-btn bg-yellow-600 text-white">
                 <i class="fas fa-oil-can"></i>
             </button>
-            <button id="addSparePartsBtn" class="floating-btn bg-indigo-600 text-white">
+            <button id="addInspectionBtn" class="floating-btn bg-indigo-600 text-white">
+                <i class="fas fa-car-crash"></i>
+            </button>
+            <button id="addSparePartsBtn" class="floating-btn bg-red-600 text-white">
                 <i class="fas fa-tools"></i>
             </button>
         </div>
@@ -284,6 +283,29 @@
             </table>
         </div>
 
+        <!-- جدول المراقبة التقنية -->
+        <div class="bg-white p-6 rounded-lg shadow-lg mb-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-semibold text-gray-700"><i class="fas fa-car-crash mr-2"></i> سجل المراقبة التقنية</h2>
+                <input type="text" id="inspectionSearch" placeholder="ابحث برقم التسجيل..." class="p-2 border rounded search-input w-40 focus:w-64">
+            </div>
+            <table class="w-full border-collapse">
+                <thead>
+                    <tr class="bg-indigo-600 text-white">
+                        <th class="p-3">رقم التسجيل</th>
+                        <th class="p-3">نوع المراقبة</th>
+                        <th class="p-3">ملاحظات</th>
+                        <th class="p-3">الملكية</th>
+                        <th class="p-3">تاريخ المراقبة</th>
+                        <th class="p-3">تاريخ الانتهاء</th>
+                        <th class="p-3">الأيام المتبقية</th>
+                        <th class="p-3">إجراءات</th>
+                    </tr>
+                </thead>
+                <tbody id="inspectionTableBody"></tbody>
+            </table>
+        </div>
+
         <!-- جدول صيانة قطع الغيار -->
         <div class="bg-white p-6 rounded-lg shadow-lg">
             <div class="flex justify-between items-center mb-4">
@@ -292,7 +314,7 @@
             </div>
             <table class="w-full border-collapse">
                 <thead>
-                    <tr class="bg-indigo-600 text-white">
+                    <tr class="bg-red-600 text-white">
                         <th class="p-3">رقم التسجيل</th>
                         <th class="p-3">الملكية</th>
                         <th class="p-3">تاريخ الصيانة</th>
@@ -370,31 +392,6 @@
         </div>
     </div>
 
-    <!-- واجهة الإحصائيات -->
-    <div id="statsView" class="container mx-auto p-6 max-w-6xl hidden">
-        <h1 class="text-3xl font-bold text-center mb-6 text-gray-800">
-            <i class="fas fa-chart-bar mr-2"></i> الإحصائيات المتقدمة
-        </h1>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="bg-white p-4 rounded-lg shadow">
-                <h2 class="text-lg font-semibold mb-4 text-gray-700">عدد المركبات حسب النوع</h2>
-                <canvas id="vehicleTypeChart"></canvas>
-            </div>
-            <div class="bg-white p-4 rounded-lg shadow">
-                <h2 class="text-lg font-semibold mb-4 text-gray-700">حالة التأمينات</h2>
-                <canvas id="insuranceStatusChart"></canvas>
-            </div>
-            <div class="bg-white p-4 rounded-lg shadow">
-                <h2 class="text-lg font-semibold mb-4 text-gray-700">توزيع المركبات حسب الشركة</h2>
-                <canvas id="companyDistributionChart"></canvas>
-            </div>
-            <div class="bg-white p-4 rounded-lg shadow">
-                <h2 class="text-lg font-semibold mb-4 text-gray-700">حالة التأمينات حسب الشركة</h2>
-                <canvas id="insuranceByCompanyChart"></canvas>
-            </div>
-        </div>
-    </div>
-
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
         import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
@@ -419,14 +416,13 @@
         let vehicles = [];
         let insurances = [];
         let maintenances = [];
+        let inspections = [];
         let spareParts = [];
-        let vehicleTypeChart, insuranceStatusChart, companyDistributionChart, insuranceByCompanyChart;
         let currentCompanyFilter = 'all';
 
         function showView(view) {
             document.getElementById('loginView').classList.add('hidden');
             document.getElementById('dashboardView').classList.add('hidden');
-            document.getElementById('statsView').classList.add('hidden');
             document.getElementById('insurancesView').classList.add('hidden');
             document.getElementById('navbar').classList.add('hidden');
 
@@ -436,9 +432,6 @@
                 document.getElementById('navbar').classList.remove('hidden');
                 if (view === 'dashboard') {
                     document.getElementById('dashboardView').classList.remove('hidden');
-                } else if (view === 'stats') {
-                    document.getElementById('statsView').classList.remove('hidden');
-                    renderCharts();
                 } else if (view === 'insurances') {
                     document.getElementById('insurancesView').classList.remove('hidden');
                     renderInsurancesTable();
@@ -498,7 +491,6 @@
         // التنقل بين الواجهات
         document.getElementById('dashboardNav').addEventListener('click', () => showView('dashboard'));
         document.getElementById('insurancesNav').addEventListener('click', () => showView('insurances'));
-        document.getElementById('statsNav').addEventListener('click', () => showView('stats'));
 
         // الوضع الليلي
         document.getElementById('darkModeToggle').addEventListener('click', () => {
@@ -521,6 +513,9 @@
                 const maintenancesSnapshot = await get(ref(database, 'maintenances'));
                 maintenances = maintenancesSnapshot.val() ? Object.entries(maintenancesSnapshot.val()).map(([id, data]) => ({ id, ...data })) : [];
 
+                const inspectionsSnapshot = await get(ref(database, 'SCANER'));
+                inspections = inspectionsSnapshot.val() ? Object.entries(inspectionsSnapshot.val()).map(([id, data]) => ({ id, ...data })) : [];
+
                 const sparePartsSnapshot = await get(ref(database, 'spareParts'));
                 spareParts = sparePartsSnapshot.val() ? Object.entries(sparePartsSnapshot.val()).map(([id, data]) => ({ id, ...data })) : [];
 
@@ -540,9 +535,11 @@
             const selects = [
                 document.getElementById('vehicleSelect'),
                 document.getElementById('maintenanceVehicleSelect'),
+                document.getElementById('inspectionVehicleSelect'),
                 document.getElementById('sparePartsVehicleSelect'),
                 document.getElementById('swalVehicleSelect'),
                 document.getElementById('swalMaintenanceVehicleSelect'),
+                document.getElementById('swalInspectionVehicleSelect'),
                 document.getElementById('swalSparePartsVehicleSelect')
             ];
             selects.forEach(select => {
@@ -560,16 +557,24 @@
 
         function updateStats() {
             document.getElementById('totalVehicles').textContent = vehicles.length;
+            
             const expiringInsurances = insurances.filter(ins => {
                 const daysRemaining = getDaysRemaining(ins.endDate);
                 return daysRemaining <= 7 && daysRemaining >= 0;
             }).length;
             document.getElementById('expiringInsurances').textContent = expiringInsurances;
+            
             const upcomingMaintenances = maintenances.filter(m => {
                 const mileageDiff = m.nextMileage - m.currentMileage;
                 return mileageDiff <= 500;
             }).length;
             document.getElementById('upcomingMaintenances').textContent = upcomingMaintenances;
+            
+            const upcomingInspections = inspections.filter(ins => {
+                const daysRemaining = getDaysRemaining(ins.endDate);
+                return daysRemaining <= 30 && daysRemaining >= 0;
+            }).length;
+            document.getElementById('upcomingInspections').textContent = upcomingInspections;
         }
 
         // تصفية حسب الشركة
@@ -766,6 +771,65 @@
             });
         });
 
+        // عرض نموذج إضافة مراقبة تقنية
+        document.getElementById('addInspectionBtn').addEventListener('click', () => {
+            Swal.fire({
+                title: 'إضافة مراقبة تقنية',
+                html: `
+                    <select id="swalInspectionVehicleSelect" class="swal2-select" required>
+                        <option value="">اختر المركبة</option>
+                        ${vehicles.map(v => `<option value="${v.plateNumber}">${v.plateNumber} (${v.vehicleType})</option>`).join('')}
+                    </select>
+                    <select id="swalInspectionType" class="swal2-select" required>
+                        <option value="مراقبة دورية">مراقبة دورية</option>
+                        <option value="مراقبة استثنائية">مراقبة استثنائية</option>
+                    </select>
+                    <input type="text" id="swalInspectionNotes" placeholder="ملاحظات" class="swal2-input">
+                    <input type="date" id="swalInspectionDate" class="swal2-input" required>
+                    <input type="date" id="swalInspectionEndDate" class="swal2-input" required>
+                `,
+                focusConfirm: false,
+                showCancelButton: true,
+                confirmButtonText: 'حفظ',
+                cancelButtonText: 'إلغاء',
+                preConfirm: async () => {
+                    const inspection = {
+                        plateNumber: document.getElementById('swalInspectionVehicleSelect').value,
+                        inspectionType: document.getElementById('swalInspectionType').value,
+                        notes: document.getElementById('swalInspectionNotes').value,
+                        inspectionDate: document.getElementById('swalInspectionDate').value,
+                        endDate: document.getElementById('swalInspectionEndDate').value
+                    };
+
+                    if (!inspection.plateNumber || !inspection.inspectionDate || !inspection.endDate) {
+                        Swal.showValidationMessage('الحقول المطلوبة: المركبة، تاريخ المراقبة، تاريخ الانتهاء');
+                        return false;
+                    }
+
+                    const id = Date.now().toString();
+
+                    try {
+                        await set(ref(database, 'SCANER/' + id), inspection);
+                        inspections.push({ id, ...inspection });
+                        renderTables();
+                        updateStats();
+                        return true;
+                    } catch (error) {
+                        Swal.showValidationMessage('حدث خطأ أثناء الإضافة: ' + error.message);
+                        return false;
+                    }
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'تمت الإضافة',
+                        text: 'تم إضافة سجل المراقبة التقنية بنجاح!'
+                    });
+                }
+            });
+        });
+
         // عرض نموذج إضافة صيانة قطع غيار
         document.getElementById('addSparePartsBtn').addEventListener('click', () => {
             Swal.fire({
@@ -838,11 +902,13 @@
                         vehicles = vehicles.filter(v => v.id !== id);
                         insurances = insurances.filter(i => i.plateNumber !== vehicle.plateNumber);
                         maintenances = maintenances.filter(m => m.plateNumber !== vehicle.plateNumber);
+                        inspections = inspections.filter(ins => ins.plateNumber !== vehicle.plateNumber);
                         spareParts = spareParts.filter(s => s.plateNumber !== vehicle.plateNumber);
 
                         await Promise.all([
                             ...insurances.map(i => remove(ref(database, 'insurances/' + i.id))),
                             ...maintenances.map(m => remove(ref(database, 'maintenances/' + m.id))),
+                            ...inspections.map(ins => remove(ref(database, 'SCANER/' + ins.id))),
                             ...spareParts.map(s => remove(ref(database, 'spareParts/' + s.id)))
                         ]);
 
@@ -971,6 +1037,56 @@
             });
         };
 
+        // تعديل مراقبة تقنية
+        window.editInspection = function(id) {
+            const inspection = inspections.find(ins => ins.id === id);
+            if (!inspection) return;
+
+            Swal.fire({
+                title: 'تعديل المراقبة التقنية',
+                html: `
+                    <select id="editInspectionPlate" class="swal2-select">
+                        <option value="">اختر المركبة</option>
+                        ${vehicles.map(v => `<option value="${v.plateNumber}" ${inspection.plateNumber === v.plateNumber ? 'selected' : ''}>${v.plateNumber} (${v.vehicleType})</option>`).join('')}
+                    </select>
+                    <select id="editInspectionType" class="swal2-select">
+                        <option value="مراقبة دورية" ${inspection.inspectionType === 'مراقبة دورية' ? 'selected' : ''}>مراقبة دورية</option>
+                        <option value="مراقبة استثنائية" ${inspection.inspectionType === 'مراقبة استثنائية' ? 'selected' : ''}>مراقبة استثنائية</option>
+                    </select>
+                    <input id="editInspectionNotes" type="text" class="swal2-input" value="${inspection.notes || ''}" placeholder="ملاحظات">
+                    <input id="editInspectionDate" type="date" class="swal2-input" value="${inspection.inspectionDate}">
+                    <input id="editInspectionEndDate" type="date" class="swal2-input" value="${inspection.endDate}">
+                `,
+                showCancelButton: true,
+                confirmButtonText: 'حفظ',
+                cancelButtonText: 'إلغاء',
+                preConfirm: async () => {
+                    const updatedInspection = {
+                        plateNumber: document.getElementById('editInspectionPlate').value,
+                        inspectionType: document.getElementById('editInspectionType').value,
+                        notes: document.getElementById('editInspectionNotes').value,
+                        inspectionDate: document.getElementById('editInspectionDate').value,
+                        endDate: document.getElementById('editInspectionEndDate').value
+                    };
+
+                    try {
+                        await set(ref(database, 'SCANER/' + id), updatedInspection);
+                        const index = inspections.findIndex(ins => ins.id === id);
+                        inspections[index] = { id, ...updatedInspection };
+                        renderTables();
+                        updateStats();
+                        Swal.fire('تم التعديل!', 'تم تعديل المراقبة التقنية بنجاح.', 'success');
+                    } catch (error) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'خطأ',
+                            text: 'حدث خطأ أثناء التعديل: ' + error.message
+                        });
+                    }
+                }
+            });
+        };
+
         // تعديل قطع غيار
         window.editSparePart = function(id) {
             const sparePart = spareParts.find(s => s.id === id);
@@ -1077,6 +1193,7 @@
             const vehicleData = vehicles.map(vehicle => {
                 const insurance = insurances.find(ins => ins.plateNumber === vehicle.plateNumber);
                 const maintenance = maintenances.filter(m => m.plateNumber === vehicle.plateNumber);
+                const inspection = inspections.find(ins => ins.plateNumber === vehicle.plateNumber);
                 const sparePart = spareParts.filter(s => s.plateNumber === vehicle.plateNumber);
                 return {
                     'العلامة': vehicle.brand,
@@ -1087,13 +1204,18 @@
                     'الملكية': vehicle.company,
                     'تاريخ بداية التأمين': insurance ? insurance.startDate : '-',
                     'تاريخ نهاية التأمين': insurance ? insurance.endDate : '-',
-                    'الأيام المتبقية': insurance ? getDaysRemaining(insurance.endDate) : '-',
+                    'الأيام المتبقية للتأمين': insurance ? getDaysRemaining(insurance.endDate) : '-',
                     'حالة التأمين': insurance ? (getDaysRemaining(insurance.endDate) <= 0 ? 'منتهي' : getDaysRemaining(insurance.endDate) <= 7 ? 'قريب من الانتهاء' : 'فعال') : '-',
                     'تاريخ تغيير الزيت': maintenance.length ? maintenance.map(m => m.oilChangeDate).join(', ') : '-',
                     'نوع الزيت': maintenance.length ? maintenance.map(m => m.oilType).join(', ') : '-',
                     'ملاحظات الصيانة': maintenance.length ? maintenance.map(m => m.maintenanceNotes).join(', ') : '-',
                     'عداد المركبة (كم)': maintenance.length ? maintenance.map(m => m.currentMileage).join(', ') : '-',
                     'عداد التغيير القادم (كم)': maintenance.length ? maintenance.map(m => m.nextMileage).join(', ') : '-',
+                    'نوع المراقبة التقنية': inspection ? inspection.inspectionType : '-',
+                    'تاريخ المراقبة التقنية': inspection ? inspection.inspectionDate : '-',
+                    'تاريخ انتهاء المراقبة': inspection ? inspection.endDate : '-',
+                    'الأيام المتبقية للمراقبة': inspection ? getDaysRemaining(inspection.endDate) : '-',
+                    'ملاحظات المراقبة': inspection ? inspection.notes || '-' : '-',
                     'تاريخ صيانة قطع الغيار': sparePart.length ? sparePart.map(s => s.sparePartsDate).join(', ') : '-',
                     'ملاحظة قطع الغيار': sparePart.length ? sparePart.map(s => s.sparePartsNote).join(', ') : '-',
                     'سعر قطع الغيار': sparePart.length ? sparePart.map(s => s.price ? `${s.price} دج` : '-').join(', ') : '-'
@@ -1109,6 +1231,7 @@
         // فلترة الجداول
         document.getElementById('vehicleSearch').addEventListener('input', () => renderTables());
         document.getElementById('maintenanceSearch').addEventListener('input', () => renderTables());
+        document.getElementById('inspectionSearch').addEventListener('input', () => renderTables());
         document.getElementById('sparePartsSearch').addEventListener('input', () => renderTables());
         document.getElementById('insuranceSearch').addEventListener('input', () => renderInsurancesTable());
         document.getElementById('insuranceTypeFilter').addEventListener('change', () => renderInsurancesTable());
@@ -1144,6 +1267,7 @@
         function renderTables() {
             const vehicleSearch = document.getElementById('vehicleSearch').value.toLowerCase();
             const maintenanceSearch = document.getElementById('maintenanceSearch').value.toLowerCase();
+            const inspectionSearch = document.getElementById('inspectionSearch').value.toLowerCase();
             const sparePartsSearch = document.getElementById('sparePartsSearch').value.toLowerCase();
 
             // جدول المركبات
@@ -1237,6 +1361,63 @@
                         </td>
                     `;
                     maintenanceTableBody.appendChild(row);
+                });
+
+            // جدول المراقبة التقنية
+            const inspectionTableBody = document.getElementById('inspectionTableBody');
+            inspectionTableBody.innerHTML = '';
+            
+            inspections
+                .filter(ins => ins.plateNumber.toLowerCase().includes(inspectionSearch))
+                .filter(ins => {
+                    if (currentCompanyFilter === 'all') return true;
+                    const vehicle = vehicles.find(v => v.plateNumber === ins.plateNumber);
+                    return vehicle && vehicle.company === currentCompanyFilter;
+                })
+                .forEach(inspection => {
+                    const vehicle = vehicles.find(v => v.plateNumber === inspection.plateNumber);
+                    const daysRemaining = getDaysRemaining(inspection.endDate);
+                    let statusClass = '';
+                    
+                    if (daysRemaining <= 0) {
+                        statusClass = 'bg-red-100 text-red-800';
+                    } else if (daysRemaining <= 30) {
+                        statusClass = 'bg-yellow-100 text-yellow-800';
+                    } else {
+                        statusClass = 'bg-green-100 text-green-800';
+                    }
+
+                    const row = document.createElement('tr');
+                    if (daysRemaining <= 0) {
+                        row.classList.add('expired');
+                    } else if (daysRemaining <= 30) {
+                        row.classList.add('warning');
+                    }
+
+                    row.innerHTML = `
+                        <td class="p-3">${inspection.plateNumber}</td>
+                        <td class="p-3">${inspection.inspectionType}</td>
+                        <td class="p-3">${inspection.notes || '-'}</td>
+                        <td class="p-3">
+                            ${vehicle ? `
+                                <span class="company-badge ${getCompanyBadgeClass(vehicle.company)}">
+                                    ${vehicle.company}
+                                </span>
+                            ` : '-'}
+                        </td>
+                        <td class="p-3">${inspection.inspectionDate}</td>
+                        <td class="p-3">${inspection.endDate}</td>
+                        <td class="p-3 text-center"><span class="px-2 py-1 rounded-full text-xs ${statusClass}">${daysRemaining}</span></td>
+                        <td class="p-3">
+                            <button onclick="editInspection('${inspection.id}')" class="action-btn text-blue-600 hover:text-blue-800 mr-2">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button onclick="deleteInspection('${inspection.id}')" class="action-btn text-red-600 hover:text-red-800">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    `;
+                    inspectionTableBody.appendChild(row);
                 });
 
             // جدول قطع الغيار
@@ -1416,6 +1597,34 @@
             });
         };
 
+        // حذف مراقبة تقنية
+        window.deleteInspection = async function(id) {
+            Swal.fire({
+                title: 'هل أنت متأكد؟',
+                text: 'سيتم حذف سجل المراقبة التقنية!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'نعم، احذف!',
+                cancelButtonText: 'إلغاء'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    try {
+                        await remove(ref(database, 'SCANER/' + id));
+                        inspections = inspections.filter(ins => ins.id !== id);
+                        renderTables();
+                        updateStats();
+                        Swal.fire('تم الحذف!', 'تم حذف سجل المراقبة بنجاح.', 'success');
+                    } catch (error) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'خطأ',
+                            text: 'حدث خطأ أثناء الحذف: ' + error.message
+                        });
+                    }
+                }
+            });
+        };
+
         // حذف قطع غيار
         window.deleteSparePart = async function(id) {
             Swal.fire({
@@ -1471,180 +1680,6 @@
                 }
             });
         };
-
-        // عرض الرسوم البيانية
-        function renderCharts() {
-            if (vehicleTypeChart) vehicleTypeChart.destroy();
-            if (insuranceStatusChart) insuranceStatusChart.destroy();
-            if (companyDistributionChart) companyDistributionChart.destroy();
-            if (insuranceByCompanyChart) insuranceByCompanyChart.destroy();
-
-            // رسم بياني لعدد المركبات حسب النوع
-            const vehicleTypes = vehicles.reduce((acc, v) => {
-                acc[v.vehicleType] = (acc[v.vehicleType] || 0) + 1;
-                return acc;
-            }, {});
-
-            const vehicleTypeLabels = ['سيارة', 'شاحنة', 'آلة شوكية', 'مقطورة', 'سيارة تجارية FORGAN', 'جرار'];
-            
-            vehicleTypeChart = new Chart(document.getElementById('vehicleTypeChart'), {
-                type: 'bar',
-                data: {
-                    labels: vehicleTypeLabels,
-                    datasets: [{
-                        label: 'عدد المركبات',
-                        data: vehicleTypeLabels.map(type => vehicleTypes[type] || 0),
-                        backgroundColor: ['#3498db', '#e74c3c', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c']
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: { position: 'top' },
-                        title: { display: true, text: 'عدد المركبات حسب النوع' }
-                    },
-                    scales: {
-                        y: { beginAtZero: true }
-                    }
-                }
-            });
-
-            // رسم بياني لحالة التأمينات
-            const insuranceStatus = {
-                active: 0,
-                expiringSoon: 0,
-                expired: 0
-            };
-
-            insurances.forEach(ins => {
-                const daysRemaining = getDaysRemaining(ins.endDate);
-                if (daysRemaining <= 0) {
-                    insuranceStatus.expired++;
-                } else if (daysRemaining <= 7) {
-                    insuranceStatus.expiringSoon++;
-                } else {
-                    insuranceStatus.active++;
-                }
-            });
-
-            insuranceStatusChart = new Chart(document.getElementById('insuranceStatusChart'), {
-                type: 'doughnut',
-                data: {
-                    labels: ['فعال', 'قريب من الانتهاء', 'منتهي'],
-                    datasets: [{
-                        label: 'حالة التأمين',
-                        data: [insuranceStatus.active, insuranceStatus.expiringSoon, insuranceStatus.expired],
-                        backgroundColor: ['#2ecc71', '#f1c40f', '#e74c3c']
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: { position: 'top' },
-                        title: { display: true, text: 'حالة التأمينات' }
-                    }
-                }
-            });
-
-            // رسم بياني لتوزيع المركبات حسب الشركة
-            const companyDistribution = vehicles.reduce((acc, v) => {
-                acc[v.company] = (acc[v.company] || 0) + 1;
-                return acc;
-            }, {});
-
-            const companyColors = {
-                'ابن عوف': '#FFE4E1',
-                'ايست دريليق': '#E6E6FA',
-                'الجيريا هام موتورز': '#F0FFF0',
-                'ابراهيم': '#FFF0F5',
-                'عتاد شخصي': '#E5E7EB'
-            };
-
-            companyDistributionChart = new Chart(document.getElementById('companyDistributionChart'), {
-                type: 'pie',
-                data: {
-                    labels: Object.keys(companyDistribution),
-                    datasets: [{
-                        label: 'عدد المركبات',
-                        data: Object.values(companyDistribution),
-                        backgroundColor: Object.keys(companyDistribution).map(company => companyColors[company] || '#CCCCCC')
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: { position: 'top' },
-                        title: { display: true, text: 'توزيع المركبات حسب الشركة' }
-                    }
-                }
-            });
-
-            // رسم بياني لحالة التأمينات حسب الشركة
-            const insuranceByCompany = {};
-            const companies = ['ابن عوف', 'ايست دريليق', 'الجيريا هام موتورز', 'ابراهيم', 'عتاد شخصي'];
-            
-            companies.forEach(company => {
-                insuranceByCompany[company] = {
-                    active: 0,
-                    expiringSoon: 0,
-                    expired: 0
-                };
-            });
-
-            insurances.forEach(ins => {
-                let company = 'عتاد شخصي';
-                if (ins.plateNumber) {
-                    const vehicle = vehicles.find(v => v.plateNumber === ins.plateNumber);
-                    company = vehicle?.company || 'غير معروف';
-                }
-                
-                if (insuranceByCompany[company]) {
-                    const daysRemaining = getDaysRemaining(ins.endDate);
-                    if (daysRemaining <= 0) {
-                        insuranceByCompany[company].expired++;
-                    } else if (daysRemaining <= 7) {
-                        insuranceByCompany[company].expiringSoon++;
-                    } else {
-                        insuranceByCompany[company].active++;
-                    }
-                }
-            });
-
-            insuranceByCompanyChart = new Chart(document.getElementById('insuranceByCompanyChart'), {
-                type: 'bar',
-                data: {
-                    labels: companies,
-                    datasets: [
-                        {
-                            label: 'فعال',
-                            data: companies.map(company => insuranceByCompany[company].active),
-                            backgroundColor: '#2ecc71'
-                        },
-                        {
-                            label: 'قريب من الانتهاء',
-                            data: companies.map(company => insuranceByCompany[company].expiringSoon),
-                            backgroundColor: '#f1c40f'
-                        },
-                        {
-                            label: 'منتهي',
-                            data: companies.map(company => insuranceByCompany[company].expired),
-                            backgroundColor: '#e74c3c'
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    scales: {
-                        x: { stacked: true },
-                        y: { stacked: true, beginAtZero: true }
-                    },
-                    plugins: {
-                        legend: { position: 'top' },
-                        title: { display: true, text: 'حالة التأمينات حسب الشركة' }
-                    }
-                }
-            });
-        }
     </script>
 </body>
 </html>
