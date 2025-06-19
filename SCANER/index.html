@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام إدارة تأمينات وصيانة المركبات</title>
+    <title>نظام إدارة المراقبة التقنية للمركبات</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -22,28 +22,14 @@
         .dark-mode .bg-white { background-color: #2d3748; }
         .dark-mode .bg-gray-100 { background-color: #1a202c; }
         .dark-mode .text-gray-700 { color: #e2e8f0; }
-        .dark-mode .bg-blue-600 { background-color: #3182ce; }
-        .dark-mode .bg-purple-600 { background-color: #7f38ae; }
-        .dark-mode .bg-red-600 { background-color: #c53030; }
-        .dark-mode .bg-green-600 { background-color: #38a169; }
+        .dark-mode .bg-indigo-600 { background-color: #667eea; }
+        .expired { background-color: #fee2e2; }
+        .warning { background-color: #fef3c7; }
+        .stats-card { transition: transform 0.3s; }
+        .stats-card:hover { transform: scale(1.05); }
         .navbar { background-color: #1e3a8a; }
         .search-input { transition: width 0.3s; }
         .search-input:focus { width: 300px; }
-        .action-btn {
-            transition: all 0.3s;
-            cursor: pointer;
-        }
-        .action-btn:hover {
-            transform: translateY(-2px);
-        }
-        /* Existing classes for background warning/expiry */
-        .warning { background-color: #fef3c7; }
-        .expired { background-color: #fee2e2; }
-
-        /* New classes for text color based on days remaining */
-        .days-remaining-green { color: #10B981; font-weight: bold; } /* Tailwind green-500 */
-        .days-remaining-red { color: #EF4444; font-weight: bold; }   /* Tailwind red-500 */
-
         .login-container {
             max-width: 400px;
             margin: 100px auto;
@@ -57,18 +43,47 @@
             margin: 0 auto;
         }
         .hidden { display: none; }
-
-        /* SweetAlert2 custom labels */
-        .swal2-label {
-            display: block;
-            text-align: right; /* For RTL */
-            margin-bottom: 0.5rem;
-            font-weight: 600; /* semi-bold */
-            color: #4a5568; /* gray-700 */
+        .action-btn {
+            transition: all 0.3s;
+            cursor: pointer;
         }
-        .dark-mode .swal2-label {
-            color: #e2e8f0;
+        .action-btn:hover {
+            transform: translateY(-2px);
         }
+        .floating-buttons {
+            position: fixed;
+            bottom: 2rem;
+            left: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            z-index: 50;
+        }
+        .floating-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+        }
+        .floating-btn:hover {
+            transform: scale(1.1);
+        }
+        .company-badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+        .company-ibn-awf { background-color: #FFE4E1; color: #8B0000; }
+        .company-east-drelig { background-color: #E6E6FA; color: #4B0082; }
+        .company-algeria-ham { background-color: #F0FFF0; color: #006400; }
+        .company-ibrahim { background-color: #FFF0F5; color: #C71585; }
+        .company-personal { background-color: #E5E7EB; color: #1F2937; }
         .filter-btn {
             transition: all 0.3s;
             cursor: pointer;
@@ -77,36 +92,47 @@
             transform: scale(1.05);
             box-shadow: 0 0 0 2px currentColor;
         }
-
+        .print-btn {
+            background-color: #6b7280;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+            margin-right: 0.5rem;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+        }
+        .print-btn:hover {
+            background-color: #4b5563;
+            transform: translateY(-2px);
+        }
         @media print {
-            body * {
-                visibility: hidden;
-            }
-            #print-area, #print-area * {
-                visibility: visible;
-            }
-            #print-area {
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 100%;
-            }
             .no-print {
-                display: none;
+                display: none !important;
             }
-            .navbar { /* Hide navbar when printing */
-                display: none;
+            body {
+                background-color: white !important;
+                color: black !important;
+            }
+            table {
+                width: 100% !important;
+                font-size: 12px !important;
+            }
+            .bg-indigo-600, .bg-red-600 {
+                color: white !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
             }
         }
     </style>
 </head>
 <body class="bg-gray-100">
     <!-- شريط التنقل -->
-    <nav id="navbar" class="navbar p-4 text-white shadow-lg hidden">
+    <nav id="navbar" class="navbar p-4 text-white shadow-lg no-print">
         <div class="container mx-auto flex justify-between items-center">
             <div class="flex items-center space-x-2">
                 <img src="https://brandlogos.net/wp-content/uploads/2022/10/sym_-_sanyang_motor-logo_brandlogos.net_mre4v.png" alt="Logo" class="h-12 w-auto">
-                <span class="text-xl font-bold hidden md:block">نظام إدارة المركبات</span>
+                <span class="text-xl font-bold hidden md:block">نظام المراقبة التقنية</span>
             </div>
             <div class="flex items-center space-x-4">
                 <button id="darkModeToggle" class="text-white hover:text-blue-300 p-2 rounded-full">
@@ -119,80 +145,93 @@
         </div>
     </nav>
 
-    <!-- واجهة تسجيل الدخول -->
-    <div id="loginView" class="login-container">
-        <img src="https://brandlogos.net/wp-content/uploads/2022/10/sym_-_sanyang_motor-logo_brandlogos.net_mre4v.png" alt="Logo" class="logo mb-4">
-        <h1 class="text-2xl font-bold text-center text-gray-800 mb-6">
-            <i class="fas fa-lock mr-2"></i> تسجيل الدخول
+    <!-- الواجهة الرئيسية -->
+    <div class="container mx-auto p-6 max-w-6xl">
+        <!-- قسم الإحصائيات -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 no-print">
+            <div class="bg-white p-4 rounded-lg shadow-lg stats-card">
+                <h3 class="text-lg font-semibold text-gray-700"><i class="fas fa-car mr-2"></i> عدد المركبات</h3>
+                <p id="totalVehicles" class="text-2xl font-bold text-indigo-600">0</p>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow-lg stats-card">
+                <h3 class="text-lg font-semibold text-gray-700"><i class="fas fa-exclamation-triangle mr-2"></i> مراقبات قريبة من الانتهاء</h3>
+                <p id="expiringInspections" class="text-2xl font-bold text-yellow-600">0</p>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow-lg stats-card">
+                <h3 class="text-lg font-semibold text-gray-700"><i class="fas fa-calendar-times mr-2"></i> مراقبات منتهية</h3>
+                <p id="expiredInspections" class="text-2xl font-bold text-red-600">0</p>
+            </div>
+        </div>
+
+        <h1 class="text-3xl font-bold text-center text-gray-800 mb-6 no-print">
+            <i class="fas fa-car-crash mr-2"></i> نظام إدارة المراقبة التقنية للمركبات
         </h1>
-        <form id="loginForm" class="space-y-4">
-            <div>
-                <label for="username" class="block text-gray-700">اسم المستخدم</label>
-                <input type="text" id="username" placeholder="أدخل اسم المستخدم" class="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-            </div>
-            <div>
-                <label for="password" class="block text-gray-700">كلمة المرور</label>
-                <input type="password" id="password" placeholder="أدخل كلمة المرور" class="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-            </div>
-            <button type="submit" class="w-full bg-blue-600 text-white p-3 rounded hover:bg-blue-700 transition duration-300">
-                <i class="fas fa-sign-in-alt mr-2"></i> تسجيل الدخول
+
+        <!-- زر تصدير إلى Excel -->
+        <div class="flex justify-end mb-4 no-print">
+            <button id="exportExcel" class="bg-purple-600 text-white p-3 rounded hover:bg-purple-700">
+                <i class="fas fa-file-excel mr-2"></i> تصدير إلى Excel
             </button>
-        </form>
-    </div>
+            <button id="addInspectionBtn" class="bg-indigo-600 text-white p-3 rounded hover:bg-indigo-700 ml-2">
+                <i class="fas fa-plus mr-2"></i> إضافة مراقبة
+            </button>
+        </div>
 
-    <!-- واجهة المراقبة التقنية -->
-    <div id="technicalInspectionView" class="container mx-auto p-6 max-w-6xl hidden">
-        <h1 class="text-3xl font-bold text-center text-gray-800 mb-6">
-            <i class="fas fa-search-dollar mr-2"></i> سجل المراقبة التقنية للمركبات
-        </h1>
-
-        <!-- أدوات البحث والتصفية والأزرار -->
+        <!-- أزرار تصفية حسب الشركة -->
         <div class="bg-white p-4 rounded-lg shadow mb-6 no-print">
-            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
-                <input type="text" id="technicalInspectionSearch" placeholder="ابحث برقم التسجيل أو اسم السائق..."
-                       class="flex-1 p-3 border rounded search-input focus:w-64">
-                <div class="flex gap-2">
-                    <button data-filter-type="all" class="filter-btn bg-gray-200 text-gray-800 px-4 py-2 rounded-full active">
-                        الكل
-                    </button>
-                    <button data-filter-type="expiring" class="filter-btn bg-yellow-100 text-yellow-800 px-4 py-2 rounded-full">
-                        قاربت الانتهاء
-                    </button>
-                </div>
-                <button id="addTechnicalInspectionBtn" class="bg-blue-600 text-white p-3 rounded hover:bg-blue-700 transition duration-300">
-                    <i class="fas fa-plus mr-2"></i> إضافة سجل مراقبة
+            <h3 class="text-lg font-semibold text-gray-700 mb-3"><i class="fas fa-filter mr-2"></i> تصفية حسب الشركة</h3>
+            <div class="flex flex-wrap gap-2">
+                <button data-company="all" class="filter-btn active bg-gray-200 text-gray-800 px-4 py-2 rounded-full">
+                    الكل
                 </button>
-            </div>
-            <div class="flex justify-end gap-2">
-                <button id="exportTechnicalInspectionExcel" class="bg-purple-600 text-white p-3 rounded hover:bg-purple-700 transition duration-300">
-                    <i class="fas fa-file-excel mr-2"></i> تصدير إلى Excel
+                <button data-company="ابن عوف" class="filter-btn bg-red-100 text-red-800 px-4 py-2 rounded-full">
+                    ابن عوف
                 </button>
-                <button id="printTechnicalInspectionRecords" class="bg-green-600 text-white p-3 rounded hover:bg-green-700 transition duration-300">
-                    <i class="fas fa-print mr-2"></i> طباعة السجل
+                <button data-company="ايست دريليق" class="filter-btn bg-purple-100 text-purple-800 px-4 py-2 rounded-full">
+                    ايست دريليق
+                </button>
+                <button data-company="الجيريا هام موتورز" class="filter-btn bg-green-100 text-green-800 px-4 py-2 rounded-full">
+                    الجيريا هام موتورز
+                </button>
+                <button data-company="ابراهيم" class="filter-btn bg-pink-100 text-pink-800 px-4 py-2 rounded-full">
+                    ابراهيم
+                </button>
+                <button data-company="عتاد شخصي" class="filter-btn bg-gray-100 text-gray-800 px-4 py-2 rounded-full">
+                    عتاد شخصي
                 </button>
             </div>
         </div>
 
         <!-- جدول المراقبة التقنية -->
-        <div class="bg-white p-6 rounded-lg shadow-lg" id="print-area">
-            <table class="w-full border-collapse">
-                <thead>
-                    <tr class="bg-blue-600 text-white">
-                        <th class="p-3">رقم التسجيل</th>
-                        <th class="p-3">السائق</th>
-                        <th class="p-3">العلامة</th>
-                        <th class="p-3">النوع</th>
-                        <th class="p-3">تاريخ المراقبة</th>
-                        <th class="p-3">تاريخ المراقبة القادمة</th>
-                        <th class="p-3">الأيام المتبقية</th>
-                        <th class="p-3 no-print">ملاحظات</th>
-                        <th class="p-3 no-print">إجراءات</th>
-                    </tr>
-                </thead>
-                <tbody id="technicalInspectionTableBody">
-                    <!-- سيتم ملء البيانات هنا بواسطة JavaScript -->
-                </tbody>
-            </table>
+        <div class="bg-white p-6 rounded-lg shadow-lg mb-6">
+            <div class="flex justify-between items-center mb-4 no-print">
+                <h2 class="text-xl font-semibold text-gray-700"><i class="fas fa-car-crash mr-2"></i> سجل المراقبة التقنية</h2>
+                <div>
+                    <button onclick="printTable('inspectionsTable', 'سجل المراقبة التقنية')" class="print-btn">
+                        <i class="fas fa-print mr-2"></i> طباعة
+                    </button>
+                    <input type="text" id="inspectionSearch" placeholder="ابحث برقم التسجيل..." class="p-2 border rounded search-input w-40 focus:w-64">
+                </div>
+            </div>
+            <div id="inspectionsTable">
+                <table class="w-full border-collapse">
+                    <thead>
+                        <tr class="bg-indigo-600 text-white">
+                            <th class="p-3">رقم التسجيل</th>
+                            <th class="p-3">المركبة</th>
+                            <th class="p-3">الملكية</th>
+                            <th class="p-3">نوع المراقبة</th>
+                            <th class="p-3">تاريخ المراقبة</th>
+                            <th class="p-3">تاريخ الانتهاء</th>
+                            <th class="p-3">الأيام المتبقية</th>
+                            <th class="p-3">الحالة</th>
+                            <th class="p-3">ملاحظات</th>
+                            <th class="p-3 no-print">إجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="inspectionsTableBody"></tbody>
+                </table>
+            </div>
         </div>
     </div>
 
@@ -201,7 +240,6 @@
         import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
         import { getDatabase, ref, set, get, remove } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
 
-        // Firebase configuration (using provided hardcoded config)
         const firebaseConfig = {
             apiKey: "AIzaSyCq965bxM1CEYAsTlBuxk8cH8iiOL2EiZY",
             authDomain: "issam-bf5e3.firebaseapp.com",
@@ -213,70 +251,33 @@
             measurementId: "G-15XBD6NWQ2"
         };
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const database = getDatabase(app);
 
         let vehicles = [];
-        let technicalInspections = [];
-        let currentFilterType = 'all'; // 'all' or 'expiring'
+        let inspections = [];
+        let currentCompanyFilter = 'all';
 
-        /**
-         * Shows the specified view and hides others.
-         * @param {string} view - The ID of the view to show ('login' or 'technicalInspection').
-         */
-        function showView(view) {
-            document.getElementById('loginView').classList.add('hidden');
-            document.getElementById('technicalInspectionView').classList.add('hidden');
-            document.getElementById('navbar').classList.add('hidden');
-
-            if (view === 'login') {
-                document.getElementById('loginView').classList.remove('hidden');
-            } else if (view === 'technicalInspection') {
-                document.getElementById('navbar').classList.remove('hidden');
-                document.getElementById('technicalInspectionView').classList.remove('hidden');
-            }
+        // دالة الطباعة
+        function printTable(tableId, title) {
+            const printContents = document.getElementById(tableId).innerHTML;
+            const originalContents = document.body.innerHTML;
+            
+            document.body.innerHTML = `
+                <h1 style="text-align: center; margin-bottom: 20px;">${title}</h1>
+                ${printContents}
+                <div style="text-align: left; margin-top: 20px; font-size: 12px;">
+                    تم الطباعة في: ${new Date().toLocaleString()}
+                </div>
+            `;
+            
+            window.print();
+            document.body.innerHTML = originalContents;
+            location.reload();
         }
 
-        // Check authentication state on page load
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                // User is signed in, show technical inspection view
-                showView('technicalInspection');
-                loadData();
-            } else {
-                // User is signed out, show login view
-                showView('login');
-            }
-        });
-
-        // Handle login form submission
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-
-            try {
-                // Use the hardcoded email if username is 'Issam', otherwise use username as email
-                const email = username === 'Issam' ? 'issam@symalgerie.dz' : username;
-                await signInWithEmailAndPassword(auth, email, password);
-                Swal.fire({
-                    icon: 'success',
-                    title: 'تم تسجيل الدخول',
-                    timer: 1500,
-                    showConfirmButton: false
-                });
-            } catch (error) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'خطأ',
-                    text: 'اسم المستخدم أو كلمة المرور غير صحيحة: ' + error.message
-                });
-            }
-        });
-
-        // Handle logout button click
+        // تسجيل الخروج
         document.getElementById('logout').addEventListener('click', () => {
             signOut(auth).then(() => {
                 Swal.fire({
@@ -285,43 +286,31 @@
                     timer: 1500,
                     showConfirmButton: false
                 });
-            }).catch((error) => {
-                console.error("Error signing out:", error);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'خطأ في تسجيل الخروج',
-                    text: error.message
-                });
+                window.location.href = 'index.html';
             });
         });
 
-        // Dark mode toggle functionality
+        // الوضع الليلي
         document.getElementById('darkModeToggle').addEventListener('click', () => {
             document.body.classList.toggle('dark-mode');
             localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
         });
 
-        // Apply dark mode preference on load
         if (localStorage.getItem('darkMode') === 'true') {
             document.body.classList.add('dark-mode');
         }
 
-        /**
-         * Loads vehicle and technical inspection data from Firebase.
-         */
         async function loadData() {
             try {
-                // Fetch vehicles data
                 const vehiclesSnapshot = await get(ref(database, 'vehicles'));
                 vehicles = vehiclesSnapshot.val() ? Object.entries(vehiclesSnapshot.val()).map(([id, data]) => ({ id, ...data })) : [];
 
-                // Fetch technical inspections data
-                const technicalInspectionsSnapshot = await get(ref(database, 'technicalInspections'));
-                technicalInspections = technicalInspectionsSnapshot.val() ? Object.entries(technicalInspectionsSnapshot.val()).map(([id, data]) => ({ id, ...data })) : [];
+                const inspectionsSnapshot = await get(ref(database, 'SCANER'));
+                inspections = inspectionsSnapshot.val() ? Object.entries(inspectionsSnapshot.val()).map(([id, data]) => ({ id, ...data })) : [];
 
-                renderTechnicalInspectionTable(); // Render the table with fetched data
+                renderInspectionsTable();
+                updateStats();
             } catch (error) {
-                console.error("Error loading data:", error);
                 Swal.fire({
                     icon: 'error',
                     title: 'خطأ',
@@ -330,226 +319,282 @@
             }
         }
 
-        /**
-         * Calculates the number of days remaining until a target date.
-         * @param {string} targetDateString - The target date in YYYY-MM-DD format.
-         * @returns {number} - The number of days remaining. Negative if date is in the past.
-         */
-        function getDaysRemaining(targetDateString) {
-            const today = new Date();
-            today.setHours(0, 0, 0, 0); // Reset time to compare dates only
-            const targetDate = new Date(targetDateString);
-            targetDate.setHours(0, 0, 0, 0); // Reset time
-
-            const diffTime = targetDate - today;
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-            return diffDays;
+        function updateStats() {
+            document.getElementById('totalVehicles').textContent = vehicles.length;
+            
+            const expiringInspections = inspections.filter(ins => {
+                const daysRemaining = getDaysRemaining(ins.endDate);
+                return daysRemaining <= 30 && daysRemaining >= 0;
+            }).length;
+            document.getElementById('expiringInspections').textContent = expiringInspections;
+            
+            const expiredInspections = inspections.filter(ins => {
+                const daysRemaining = getDaysRemaining(ins.endDate);
+                return daysRemaining < 0;
+            }).length;
+            document.getElementById('expiredInspections').textContent = expiredInspections;
         }
 
-        /**
-         * Renders the technical inspection table based on current data, search filter, and expiry filter.
-         */
-        function renderTechnicalInspectionTable() {
-            const tableBody = document.getElementById('technicalInspectionTableBody');
-            tableBody.innerHTML = ''; // Clear existing rows
-            const searchQuery = document.getElementById('technicalInspectionSearch').value.toLowerCase();
-
-            // Merge vehicle and inspection data
-            const mergedData = technicalInspections.map(inspection => {
-                const vehicle = vehicles.find(v => v.plateNumber === inspection.plateNumber);
-                return { ...inspection, vehicle };
-            }).filter(item => item.vehicle); // Only include inspections linked to existing vehicles
-
-            // Apply search filter
-            let filteredData = mergedData.filter(item => {
-                const plateNumberMatch = item.plateNumber.toLowerCase().includes(searchQuery);
-                const driverNameMatch = item.vehicle && item.vehicle.driverName ? item.vehicle.driverName.toLowerCase().includes(searchQuery) : false;
-                return plateNumberMatch || driverNameMatch;
+        // تصفية حسب الشركة
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentCompanyFilter = btn.dataset.company;
+                renderInspectionsTable();
             });
+        });
 
-            // Apply expiry filter
-            if (currentFilterType === 'expiring') {
-                filteredData = filteredData.filter(item => {
-                    const daysRemaining = getDaysRemaining(item.nextInspectionDate);
-                    return daysRemaining <= 30; // Filter for 30 days or less remaining
-                });
-            }
-
-            if (filteredData.length === 0) {
-                tableBody.innerHTML = `<tr><td colspan="9" class="p-3 text-center text-gray-500">لا توجد سجلات مراقبة فنية مطابقة.</td></tr>`;
-                return;
-            }
-
-            filteredData.forEach(item => {
-                const row = document.createElement('tr');
-                row.classList.add('border-b', 'border-gray-200');
-
-                const daysRemaining = getDaysRemaining(item.nextInspectionDate);
-                let daysRemainingClass = '';
-                if (daysRemaining <= 10) { // 10 days or less (including expired)
-                    daysRemainingClass = 'days-remaining-red';
-                } else { // More than 10 days
-                    daysRemainingClass = 'days-remaining-green';
-                }
-
-                if (daysRemaining <= 0) {
-                    row.classList.add('expired'); // Apply expired background if date has passed
-                } else if (daysRemaining <= 30) {
-                    row.classList.add('warning'); // Apply warning background if within 30 days
-                }
-
-
-                row.innerHTML = `
-                    <td class="p-3 text-center">${item.plateNumber}</td>
-                    <td class="p-3 text-center">${item.vehicle.driverName || 'N/A'}</td>
-                    <td class="p-3 text-center">${item.vehicle.brand || 'N/A'}</td>
-                    <td class="p-3 text-center">${item.vehicle.model || 'N/A'}</td>
-                    <td class="p-3 text-center">${item.inspectionDate}</td>
-                    <td class="p-3 text-center">${item.nextInspectionDate}</td>
-                    <td class="p-3 text-center ${daysRemainingClass}">
-                        ${daysRemaining > 0 ? daysRemaining + ' يوم' : (daysRemaining === 0 ? 'اليوم!' : 'انتهى')}
-                    </td>
-                    <td class="p-3 text-center no-print">${item.notes || '-'}</td>
-                    <td class="p-3 text-center no-print">
-                        <button class="action-btn bg-yellow-500 text-white p-2 rounded-full mx-1" onclick="editTechnicalInspection('${item.id}')">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="action-btn bg-red-500 text-white p-2 rounded-full mx-1" onclick="deleteTechnicalInspection('${item.id}')">
-                            <i class="fas fa-trash-alt"></i>
-                        </button>
-                    </td>
-                `;
-                tableBody.appendChild(row);
-            });
-        }
-
-        /**
-         * Filters the vehicle options in SweetAlert2 select box based on search input.
-         * @param {HTMLSelectElement} selectElement - The select element to filter.
-         * @param {HTMLInputElement} searchInput - The input element containing the search query.
-         * @param {string} selectedPlateNumber - The plate number of the currently selected vehicle (for edit mode).
-         */
-        function filterVehicleOptions(selectElement, searchInput, selectedPlateNumber = '') {
-            const query = searchInput.value.toLowerCase();
-            selectElement.innerHTML = ''; // Clear current options
-            const defaultOption = document.createElement('option');
-            defaultOption.value = '';
-            defaultOption.textContent = 'اختر المركبة';
-            selectElement.appendChild(defaultOption);
-
-            vehicles.forEach(vehicle => {
-                const text = `${vehicle.plateNumber} (${vehicle.driverName || 'لا يوجد سائق'}) - ${vehicle.brand} ${vehicle.model}`;
-                if (text.toLowerCase().includes(query)) {
-                    const option = document.createElement('option');
-                    option.value = vehicle.plateNumber;
-                    option.textContent = text;
-                    if (vehicle.plateNumber === selectedPlateNumber) {
-                        option.selected = true; // Pre-select for edit mode
-                    }
-                    selectElement.appendChild(option);
-                }
-            });
-        }
-
-
-        // Global functions for event listeners (used in onclick attributes)
-        window.editTechnicalInspection = async (id) => {
-            const inspection = technicalInspections.find(item => item.id === id);
-            if (!inspection) return;
-
-            // Prepare options for vehicle select, initially showing all
-            let vehicleOptionsHtml = '<option value="">اختر المركبة</option>';
-            vehicles.forEach(v => {
-                vehicleOptionsHtml += `<option value="${v.plateNumber}">${v.plateNumber} (${v.driverName || 'لا يوجد سائق'}) - ${v.brand} ${v.model}</option>`;
-            });
-
-            const { value: formValues } = await Swal.fire({
-                title: 'تعديل سجل المراقبة التقنية',
+        // عرض نموذج إضافة مراقبة تقنية
+        document.getElementById('addInspectionBtn').addEventListener('click', () => {
+            Swal.fire({
+                title: 'إضافة مراقبة تقنية جديدة',
                 html: `
-                    <label for="swalEditVehicleSearchInput" class="swal2-label mt-2">ابحث عن المركبة:</label>
-                    <input type="text" id="swalEditVehicleSearchInput" placeholder="رقم التسجيل أو اسم السائق..." class="swal2-input mb-2">
-                    <select id="swalEditVehicleSelect" class="swal2-input" required>${vehicleOptionsHtml}</select>
-                    <label for="swalEditInspectionDate" class="swal2-label mt-4">تاريخ المراقبة التقنية</label>
-                    <input type="date" id="swalEditInspectionDate" class="swal2-input" value="${inspection.inspectionDate}" required>
-                    <label for="swalEditNextInspectionDate" class="swal2-label mt-4">موعد المراقبة التقنية القادم</label>
-                    <input type="date" id="swalEditNextInspectionDate" class="swal2-input" value="${inspection.nextInspectionDate}" required>
-                    <label for="swalEditNotes" class="swal2-label mt-4">ملاحظات</label>
-                    <textarea id="swalEditNotes" placeholder="ملاحظات" class="swal2-textarea">${inspection.notes || ''}</textarea>
+                    <select id="swalInspectionVehicle" class="swal2-select" required>
+                        <option value="">اختر المركبة</option>
+                        ${vehicles.map(v => `<option value="${v.plateNumber}">${v.plateNumber} (${v.brand} ${v.model})</option>`).join('')}
+                    </select>
+                    <select id="swalInspectionType" class="swal2-select" required>
+                        <option value="مراقبة دورية">مراقبة دورية</option>
+                        <option value="مراقبة استثنائية">مراقبة استثنائية</option>
+                    </select>
+                    <input type="date" id="swalInspectionDate" class="swal2-input" required>
+                    <input type="date" id="swalInspectionEndDate" class="swal2-input" required>
+                    <textarea id="swalInspectionNotes" class="swal2-textarea" placeholder="ملاحظات"></textarea>
                 `,
                 focusConfirm: false,
                 showCancelButton: true,
-                confirmButtonText: 'حفظ التغييرات',
+                confirmButtonText: 'حفظ',
                 cancelButtonText: 'إلغاء',
-                didOpen: () => {
-                    const vehicleSelect = document.getElementById('swalEditVehicleSelect');
-                    const vehicleSearchInput = document.getElementById('swalEditVehicleSearchInput');
-                    
-                    // Initialize the search input with the current vehicle's plate number/info for pre-selection
-                    const currentVehicle = vehicles.find(v => v.plateNumber === inspection.plateNumber);
-                    if (currentVehicle) {
-                         vehicleSearchInput.value = `${currentVehicle.plateNumber} (${currentVehicle.driverName || 'لا يوجد سائق'})`;
-                    }
-                    // Filter options initially with pre-selected value
-                    filterVehicleOptions(vehicleSelect, vehicleSearchInput, inspection.plateNumber);
-                    
-                    vehicleSearchInput.addEventListener('keyup', () => filterVehicleOptions(vehicleSelect, vehicleSearchInput));
-                },
-                preConfirm: () => {
-                    const plateNumber = document.getElementById('swalEditVehicleSelect').value;
-                    const inspectionDate = document.getElementById('swalEditInspectionDate').value;
-                    const nextInspectionDate = document.getElementById('swalEditNextInspectionDate').value;
-                    const notes = document.getElementById('swalEditNotes').value;
+                preConfirm: async () => {
+                    const inspection = {
+                        plateNumber: document.getElementById('swalInspectionVehicle').value,
+                        inspectionType: document.getElementById('swalInspectionType').value,
+                        inspectionDate: document.getElementById('swalInspectionDate').value,
+                        endDate: document.getElementById('swalInspectionEndDate').value,
+                        notes: document.getElementById('swalInspectionNotes').value || ''
+                    };
 
-                    if (!plateNumber || !inspectionDate || !nextInspectionDate) {
-                        Swal.showValidationMessage('جميع الحقول مطلوبة.');
+                    if (!inspection.plateNumber || !inspection.inspectionDate || !inspection.endDate) {
+                        Swal.showValidationMessage('الحقول المطلوبة: المركبة، تاريخ المراقبة، تاريخ الانتهاء');
                         return false;
                     }
-                    return { plateNumber, inspectionDate, nextInspectionDate, notes };
-                }
-            });
 
-            if (formValues) {
-                try {
-                    await set(ref(database, 'technicalInspections/' + id), formValues);
+                    const id = Date.now().toString();
+
+                    try {
+                        await set(ref(database, 'SCANER/' + id), inspection);
+                        inspections.push({ id, ...inspection });
+                        renderInspectionsTable();
+                        updateStats();
+                        return true;
+                    } catch (error) {
+                        Swal.showValidationMessage('حدث خطأ أثناء الإضافة: ' + error.message);
+                        return false;
+                    }
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
                     Swal.fire({
                         icon: 'success',
-                        title: 'تم التعديل بنجاح!',
-                        text: 'تم تحديث سجل المراقبة التقنية.'
-                    });
-                    loadData(); // Reload data to update table
-                } catch (error) {
-                    console.error("Error updating technical inspection:", error);
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'خطأ',
-                        text: 'حدث خطأ أثناء التعديل: ' + error.message
+                        title: 'تمت الإضافة',
+                        text: 'تم إضافة سجل المراقبة التقنية بنجاح!'
                     });
                 }
+            });
+        });
+
+        // حساب الأيام المتبقية
+        function getDaysRemaining(endDate) {
+            const today = new Date();
+            const end = new Date(endDate);
+            const diffTime = end - today;
+            return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        }
+
+        // تصدير إلى Excel
+        document.getElementById('exportExcel').addEventListener('click', () => {
+            const inspectionData = inspections.map(inspection => {
+                const vehicle = vehicles.find(v => v.plateNumber === inspection.plateNumber);
+                const daysRemaining = getDaysRemaining(inspection.endDate);
+                let status = '';
+                
+                if (daysRemaining <= 0) {
+                    status = 'منتهي';
+                } else if (daysRemaining <= 30) {
+                    status = 'قريب من الانتهاء';
+                } else {
+                    status = 'فعال';
+                }
+
+                return {
+                    'رقم التسجيل': inspection.plateNumber,
+                    'المركبة': vehicle ? `${vehicle.brand} ${vehicle.model}` : 'غير معروف',
+                    'الملكية': vehicle ? vehicle.company : 'غير معروف',
+                    'نوع المراقبة': inspection.inspectionType,
+                    'تاريخ المراقبة': inspection.inspectionDate,
+                    'تاريخ الانتهاء': inspection.endDate,
+                    'الأيام المتبقية': daysRemaining,
+                    'الحالة': status,
+                    'ملاحظات': inspection.notes || '-'
+                };
+            });
+
+            const worksheet = XLSX.utils.json_to_sheet(inspectionData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, 'Inspections Data');
+            XLSX.writeFile(workbook, 'inspections_data.xlsx');
+        });
+
+        // فلترة الجداول
+        document.getElementById('inspectionSearch').addEventListener('input', () => renderInspectionsTable());
+
+        function getCompanyBadgeClass(company) {
+            switch(company) {
+                case 'ابن عوف': return 'company-ibn-awf';
+                case 'ايست دريليق': return 'company-east-drelig';
+                case 'الجيريا هام موتورز': return 'company-algeria-ham';
+                case 'ابراهيم': return 'company-ibrahim';
+                case 'عتاد شخصي': return 'company-personal';
+                default: return 'bg-gray-100 text-gray-800';
             }
+        }
+
+        function renderInspectionsTable() {
+            const searchTerm = document.getElementById('inspectionSearch').value.toLowerCase();
+
+            const inspectionsTableBody = document.getElementById('inspectionsTableBody');
+            inspectionsTableBody.innerHTML = '';
+
+            const filteredInspections = inspections
+                .filter(ins => ins.plateNumber.toLowerCase().includes(searchTerm))
+                .filter(ins => {
+                    if (currentCompanyFilter === 'all') return true;
+                    const vehicle = vehicles.find(v => v.plateNumber === ins.plateNumber);
+                    return vehicle && vehicle.company === currentCompanyFilter;
+                });
+
+            filteredInspections.forEach(inspection => {
+                const vehicle = vehicles.find(v => v.plateNumber === inspection.plateNumber);
+                const daysRemaining = getDaysRemaining(inspection.endDate);
+                let status = '';
+                let statusClass = '';
+                
+                if (daysRemaining <= 0) {
+                    status = 'منتهي';
+                    statusClass = 'bg-red-100 text-red-800';
+                } else if (daysRemaining <= 30) {
+                    status = 'قريب من الانتهاء';
+                    statusClass = 'bg-yellow-100 text-yellow-800';
+                } else {
+                    status = 'فعال';
+                    statusClass = 'bg-green-100 text-green-800';
+                }
+
+                const row = document.createElement('tr');
+                if (daysRemaining <= 0) {
+                    row.classList.add('expired');
+                } else if (daysRemaining <= 30) {
+                    row.classList.add('warning');
+                }
+
+                row.innerHTML = `
+                    <td class="p-3">${inspection.plateNumber}</td>
+                    <td class="p-3">${vehicle ? `${vehicle.brand} ${vehicle.model}` : 'غير معروف'}</td>
+                    <td class="p-3">
+                        ${vehicle ? `
+                            <span class="company-badge ${getCompanyBadgeClass(vehicle.company)}">
+                                ${vehicle.company}
+                            </span>
+                        ` : 'غير معروف'}
+                    </td>
+                    <td class="p-3">${inspection.inspectionType}</td>
+                    <td class="p-3">${inspection.inspectionDate}</td>
+                    <td class="p-3">${inspection.endDate}</td>
+                    <td class="p-3 text-center"><span class="px-2 py-1 rounded-full text-xs ${statusClass}">${daysRemaining}</span></td>
+                    <td class="p-3 text-center"><span class="px-2 py-1 rounded-full text-xs ${statusClass}">${status}</span></td>
+                    <td class="p-3">${inspection.notes || '-'}</td>
+                    <td class="p-3 no-print">
+                        <button onclick="editInspection('${inspection.id}')" class="action-btn text-blue-600 hover:text-blue-800 mr-2">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button onclick="deleteInspection('${inspection.id}')" class="action-btn text-red-600 hover:text-red-800">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                inspectionsTableBody.appendChild(row);
+            });
+        }
+
+        // تعديل مراقبة تقنية
+        window.editInspection = function(id) {
+            const inspection = inspections.find(ins => ins.id === id);
+            if (!inspection) return;
+
+            Swal.fire({
+                title: 'تعديل المراقبة التقنية',
+                html: `
+                    <select id="editInspectionPlate" class="swal2-select">
+                        <option value="">اختر المركبة</option>
+                        ${vehicles.map(v => `<option value="${v.plateNumber}" ${inspection.plateNumber === v.plateNumber ? 'selected' : ''}>${v.plateNumber} (${v.brand} ${v.model})</option>`).join('')}
+                    </select>
+                    <select id="editInspectionType" class="swal2-select">
+                        <option value="مراقبة دورية" ${inspection.inspectionType === 'مراقبة دورية' ? 'selected' : ''}>مراقبة دورية</option>
+                        <option value="مراقبة استثنائية" ${inspection.inspectionType === 'مراقبة استثنائية' ? 'selected' : ''}>مراقبة استثنائية</option>
+                    </select>
+                    <input type="date" id="editInspectionDate" class="swal2-input" value="${inspection.inspectionDate}">
+                    <input type="date" id="editInspectionEndDate" class="swal2-input" value="${inspection.endDate}">
+                    <textarea id="editInspectionNotes" class="swal2-textarea" placeholder="ملاحظات">${inspection.notes || ''}</textarea>
+                `,
+                showCancelButton: true,
+                confirmButtonText: 'حفظ',
+                cancelButtonText: 'إلغاء',
+                preConfirm: async () => {
+                    const updatedInspection = {
+                        plateNumber: document.getElementById('editInspectionPlate').value,
+                        inspectionType: document.getElementById('editInspectionType').value,
+                        inspectionDate: document.getElementById('editInspectionDate').value,
+                        endDate: document.getElementById('editInspectionEndDate').value,
+                        notes: document.getElementById('editInspectionNotes').value || ''
+                    };
+
+                    try {
+                        await set(ref(database, 'SCANER/' + id), updatedInspection);
+                        const index = inspections.findIndex(ins => ins.id === id);
+                        inspections[index] = { id, ...updatedInspection };
+                        renderInspectionsTable();
+                        updateStats();
+                        Swal.fire('تم التعديل!', 'تم تعديل المراقبة التقنية بنجاح.', 'success');
+                    } catch (error) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'خطأ',
+                            text: 'حدث خطأ أثناء التعديل: ' + error.message
+                        });
+                    }
+                }
+            });
         };
 
-        window.deleteTechnicalInspection = async (id) => {
+        // حذف مراقبة تقنية
+        window.deleteInspection = async function(id) {
             Swal.fire({
                 title: 'هل أنت متأكد؟',
-                text: "لن تتمكن من التراجع عن هذا!",
+                text: 'سيتم حذف سجل المراقبة التقنية!',
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: 'نعم، احذفها!',
+                confirmButtonText: 'نعم، احذف!',
                 cancelButtonText: 'إلغاء'
             }).then(async (result) => {
                 if (result.isConfirmed) {
                     try {
-                        await remove(ref(database, 'technicalInspections/' + id));
-                        Swal.fire(
-                            'تم الحذف!',
-                            'تم حذف سجل المراقبة التقنية.',
-                            'success'
-                        );
-                        loadData(); // Reload data to update table
+                        await remove(ref(database, 'SCANER/' + id));
+                        inspections = inspections.filter(ins => ins.id !== id);
+                        renderInspectionsTable();
+                        updateStats();
+                        Swal.fire('تم الحذف!', 'تم حذف سجل المراقبة بنجاح.', 'success');
                     } catch (error) {
-                        console.error("Error deleting technical inspection:", error);
                         Swal.fire({
                             icon: 'error',
                             title: 'خطأ',
@@ -560,126 +605,14 @@
             });
         };
 
-        // Add Technical Inspection button functionality
-        document.getElementById('addTechnicalInspectionBtn').addEventListener('click', async () => {
-            // Prepare options for vehicle select (initially all)
-            let vehicleOptionsHtml = '<option value="">اختر المركبة</option>';
-            vehicles.forEach(v => {
-                vehicleOptionsHtml += `<option value="${v.plateNumber}">${v.plateNumber} (${v.driverName || 'لا يوجد سائق'}) - ${v.brand} ${v.model}</option>`;
-            });
-
-            const { value: formValues } = await Swal.fire({
-                title: 'إضافة سجل مراقبة تقنية جديد',
-                html: `
-                    <label for="swalAddVehicleSearchInput" class="swal2-label mt-2">ابحث عن المركبة:</label>
-                    <input type="text" id="swalAddVehicleSearchInput" placeholder="رقم التسجيل أو اسم السائق..." class="swal2-input mb-2">
-                    <select id="swalAddVehicleSelect" class="swal2-input" required>${vehicleOptionsHtml}</select>
-                    <label for="swalAddInspectionDate" class="swal2-label mt-4">تاريخ المراقبة التقنية</label>
-                    <input type="date" id="swalAddInspectionDate" class="swal2-input" required>
-                    <label for="swalAddNextInspectionDate" class="swal2-label mt-4">موعد المراقبة التقنية القادم</label>
-                    <input type="date" id="swalAddNextInspectionDate" class="swal2-input" required>
-                    <label for="swalAddNotes" class="swal2-label mt-4">ملاحظات</label>
-                    <textarea id="swalAddNotes" placeholder="ملاحظات" class="swal2-textarea"></textarea>
-                `,
-                focusConfirm: false,
-                showCancelButton: true,
-                confirmButtonText: 'إضافة',
-                cancelButtonText: 'إلغاء',
-                didOpen: () => {
-                    const vehicleSelect = document.getElementById('swalAddVehicleSelect');
-                    const vehicleSearchInput = document.getElementById('swalAddVehicleSearchInput');
-                    filterVehicleOptions(vehicleSelect, vehicleSearchInput); // Initial filter
-                    vehicleSearchInput.addEventListener('keyup', () => filterVehicleOptions(vehicleSelect, vehicleSearchInput));
-                },
-                preConfirm: () => {
-                    const plateNumber = document.getElementById('swalAddVehicleSelect').value;
-                    const inspectionDate = document.getElementById('swalAddInspectionDate').value;
-                    const nextInspectionDate = document.getElementById('swalAddNextInspectionDate').value;
-                    const notes = document.getElementById('swalAddNotes').value;
-
-                    if (!plateNumber || !inspectionDate || !nextInspectionDate) {
-                        Swal.showValidationMessage('جميع الحقول مطلوبة.');
-                        return false;
-                    }
-                    return { plateNumber, inspectionDate, nextInspectionDate, notes };
-                }
-            });
-
-            if (formValues) {
-                try {
-                    // Generate a unique ID for the new inspection record
-                    const newInspectionId = Date.now().toString(); // Simple timestamp-based ID
-                    await set(ref(database, 'technicalInspections/' + newInspectionId), formValues);
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'تمت الإضافة بنجاح!',
-                        text: 'تم إضافة سجل المراقبة التقنية.'
-                    });
-                    loadData(); // Reload data to update table
-                } catch (error) {
-                    console.error("Error adding technical inspection:", error);
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'خطأ',
-                        text: 'حدث خطأ أثناء الإضافة: ' + error.message
-                    });
-                }
+        // تحميل البيانات عند بدء التشغيل
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                loadData();
+            } else {
+                window.location.href = 'index.html';
             }
         });
-
-        // Search functionality for the main table
-        document.getElementById('technicalInspectionSearch').addEventListener('keyup', renderTechnicalInspectionTable);
-
-        // Filter buttons functionality
-        document.querySelectorAll('.filter-btn').forEach(button => {
-            button.addEventListener('click', (e) => {
-                document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-                e.target.classList.add('active');
-                currentFilterType = e.target.dataset.filterType;
-                renderTechnicalInspectionTable();
-            });
-        });
-
-        // Export to Excel functionality
-        document.getElementById('exportTechnicalInspectionExcel').addEventListener('click', () => {
-            const table = document.getElementById('technicalInspectionTableBody');
-            const ws_data = [];
-
-            // Add header row
-            const headerRow = [];
-            document.querySelectorAll('#print-area thead th').forEach(th => {
-                // Exclude elements with 'no-print' class from Excel header
-                if (!th.classList.contains('no-print')) {
-                    headerRow.push(th.textContent.trim());
-                }
-            });
-            ws_data.push(headerRow);
-
-            // Add table data
-            table.querySelectorAll('tr').forEach(row => {
-                const rowData = [];
-                row.querySelectorAll('td').forEach(cell => {
-                    // Exclude elements with 'no-print' class from Excel data
-                    if (!cell.classList.contains('no-print')) {
-                        rowData.push(cell.textContent.trim());
-                    }
-                });
-                if (rowData.length > 0) {
-                    ws_data.push(rowData);
-                }
-            });
-
-            const ws = XLSX.utils.aoa_to_sheet(ws_data);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "سجل المراقبة التقنية");
-            XLSX.writeFile(wb, "سجل_المراقبة_التقنية.xlsx");
-        });
-
-        // Print functionality
-        document.getElementById('printTechnicalInspectionRecords').addEventListener('click', () => {
-            window.print();
-        });
-
     </script>
 </body>
 </html>
