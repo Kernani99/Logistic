@@ -109,11 +109,43 @@
             font-weight: bold;
             border-top: 2px solid #dee2e6;
         }
+        .print-btn {
+            background-color: #6b7280;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+            margin-right: 0.5rem;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+        }
+        .print-btn:hover {
+            background-color: #4b5563;
+            transform: translateY(-2px);
+        }
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            body {
+                background-color: white !important;
+                color: black !important;
+            }
+            table {
+                width: 100% !important;
+                font-size: 12px !important;
+            }
+            .bg-blue-600, .bg-yellow-600, .bg-indigo-600, .bg-red-600 {
+                color: white !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+        }
     </style>
 </head>
 <body class="bg-gray-100">
     <!-- شريط التنقل -->
-    <nav id="navbar" class="navbar p-4 text-white shadow-lg hidden">
+    <nav id="navbar" class="navbar p-4 text-white shadow-lg hidden no-print">
         <div class="container mx-auto flex justify-between items-center">
             <div class="flex items-center space-x-2">
                 <img src="https://brandlogos.net/wp-content/uploads/2022/10/sym_-_sanyang_motor-logo_brandlogos.net_mre4v.png" alt="Logo" class="h-12 w-auto">
@@ -160,7 +192,7 @@
     <!-- واجهة الإدارة -->
     <div id="dashboardView" class="container mx-auto p-6 max-w-6xl hidden">
         <!-- قسم الإحصائيات -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 no-print">
             <div class="bg-white p-4 rounded-lg shadow-lg stats-card">
                 <h3 class="text-lg font-semibold text-gray-700"><i class="fas fa-car mr-2"></i> عدد المركبات</h3>
                 <p id="totalVehicles" class="text-2xl font-bold text-blue-600">0</p>
@@ -179,19 +211,19 @@
             </div>
         </div>
 
-        <h1 class="text-3xl font-bold text-center text-gray-800 mb-6">
+        <h1 class="text-3xl font-bold text-center text-gray-800 mb-6 no-print">
             <i class="fas fa-car-side mr-2"></i> نظام إدارة المركبات
         </h1>
 
         <!-- زر تصدير إلى Excel -->
-        <div class="flex justify-end mb-4">
+        <div class="flex justify-end mb-4 no-print">
             <button id="exportExcel" class="bg-purple-600 text-white p-3 rounded hover:bg-purple-700">
                 <i class="fas fa-file-excel mr-2"></i> تصدير إلى Excel
             </button>
         </div>
 
         <!-- أزرار تصفية حسب الشركة -->
-        <div class="bg-white p-4 rounded-lg shadow mb-6">
+        <div class="bg-white p-4 rounded-lg shadow mb-6 no-print">
             <h3 class="text-lg font-semibold text-gray-700 mb-3"><i class="fas fa-filter mr-2"></i> تصفية حسب الشركة</h3>
             <div class="flex flex-wrap gap-2">
                 <button data-company="all" class="filter-btn active bg-gray-200 text-gray-800 px-4 py-2 rounded-full">
@@ -216,7 +248,7 @@
         </div>
 
         <!-- أزرار الإضافة العائمة -->
-        <div class="floating-buttons">
+        <div class="floating-buttons no-print">
             <button id="addVehicleBtn" class="floating-btn bg-blue-600 text-white">
                 <i class="fas fa-car"></i>
             </button>
@@ -236,109 +268,137 @@
 
         <!-- جدول المركبات -->
         <div class="bg-white p-6 rounded-lg shadow-lg mb-6">
-            <div class="flex justify-between items-center mb-4">
+            <div class="flex justify-between items-center mb-4 no-print">
                 <h2 class="text-xl font-semibold text-gray-700"><i class="fas fa-table mr-2"></i> قائمة المركبات</h2>
-                <input type="text" id="vehicleSearch" placeholder="ابحث برقم التسجيل..." class="p-2 border rounded search-input w-40 focus:w-64">
+                <div>
+                    <button onclick="printTable('vehiclesTable', 'قائمة المركبات')" class="print-btn">
+                        <i class="fas fa-print mr-2"></i> طباعة
+                    </button>
+                    <input type="text" id="vehicleSearch" placeholder="ابحث برقم التسجيل..." class="p-2 border rounded search-input w-40 focus:w-64">
+                </div>
             </div>
-            <table class="w-full border-collapse">
-                <thead>
-                    <tr class="bg-blue-600 text-white">
-                        <th class="p-3">العلامة</th>
-                        <th class="p-3">النوع</th>
-                        <th class="p-3">رقم التسجيل</th>
-                        <th class="p-3">السائق</th>
-                        <th class="p-3">نوع المركبة</th>
-                        <th class="p-3">الملكية</th>
-                        <th class="p-3">تاريخ بداية التأمين</th>
-                        <th class="p-3">تاريخ نهاية التأمين</th>
-                        <th class="p-3">الأيام المتبقية</th>
-                        <th class="p-3">الحالة</th>
-                        <th class="p-3">إجراءات</th>
-                    </tr>
-                </thead>
-                <tbody id="vehiclesTableBody"></tbody>
-            </table>
+            <div id="vehiclesTable">
+                <table class="w-full border-collapse">
+                    <thead>
+                        <tr class="bg-blue-600 text-white">
+                            <th class="p-3">العلامة</th>
+                            <th class="p-3">النوع</th>
+                            <th class="p-3">رقم التسجيل</th>
+                            <th class="p-3">السائق</th>
+                            <th class="p-3">نوع المركبة</th>
+                            <th class="p-3">الملكية</th>
+                            <th class="p-3">تاريخ بداية التأمين</th>
+                            <th class="p-3">تاريخ نهاية التأمين</th>
+                            <th class="p-3">الأيام المتبقية</th>
+                            <th class="p-3">الحالة</th>
+                            <th class="p-3 no-print">إجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="vehiclesTableBody"></tbody>
+                </table>
+            </div>
         </div>
 
         <!-- جدول صيانة الزيوت -->
         <div class="bg-white p-6 rounded-lg shadow-lg mb-6">
-            <div class="flex justify-between items-center mb-4">
+            <div class="flex justify-between items-center mb-4 no-print">
                 <h2 class="text-xl font-semibold text-gray-700"><i class="fas fa-oil-can mr-2"></i> سجل صيانة الزيوت</h2>
-                <input type="text" id="maintenanceSearch" placeholder="ابحث برقم التسجيل..." class="p-2 border rounded search-input w-40 focus:w-64">
+                <div>
+                    <button onclick="printTable('maintenanceTable', 'سجل صيانة الزيوت')" class="print-btn">
+                        <i class="fas fa-print mr-2"></i> طباعة
+                    </button>
+                    <input type="text" id="maintenanceSearch" placeholder="ابحث برقم التسجيل..." class="p-2 border rounded search-input w-40 focus:w-64">
+                </div>
             </div>
-            <table class="w-full border-collapse">
-                <thead>
-                    <tr class="bg-yellow-600 text-white">
-                        <th class="p-3">رقم التسجيل</th>
-                        <th class="p-3">نوع الزيت</th>
-                        <th class="p-3">ملاحظات الصيانة</th>
-                        <th class="p-3">الملكية</th>
-                        <th class="p-3">تاريخ تغيير الزيت</th>
-                        <th class="p-3">عداد المركبة (كم)</th>
-                        <th class="p-3">عداد التغيير القادم (كم)</th>
-                        <th class="p-3">إجراءات</th>
-                    </tr>
-                </thead>
-                <tbody id="maintenanceTableBody"></tbody>
-            </table>
+            <div id="maintenanceTable">
+                <table class="w-full border-collapse">
+                    <thead>
+                        <tr class="bg-yellow-600 text-white">
+                            <th class="p-3">رقم التسجيل</th>
+                            <th class="p-3">نوع الزيت</th>
+                            <th class="p-3">ملاحظات الصيانة</th>
+                            <th class="p-3">الملكية</th>
+                            <th class="p-3">تاريخ تغيير الزيت</th>
+                            <th class="p-3">عداد المركبة (كم)</th>
+                            <th class="p-3">عداد التغيير القادم (كم)</th>
+                            <th class="p-3 no-print">إجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="maintenanceTableBody"></tbody>
+                </table>
+            </div>
         </div>
 
         <!-- جدول المراقبة التقنية -->
         <div class="bg-white p-6 rounded-lg shadow-lg mb-6">
-            <div class="flex justify-between items-center mb-4">
+            <div class="flex justify-between items-center mb-4 no-print">
                 <h2 class="text-xl font-semibold text-gray-700"><i class="fas fa-car-crash mr-2"></i> سجل المراقبة التقنية</h2>
-                <input type="text" id="inspectionSearch" placeholder="ابحث برقم التسجيل..." class="p-2 border rounded search-input w-40 focus:w-64">
+                <div>
+                    <button onclick="printTable('inspectionTable', 'سجل المراقبة التقنية')" class="print-btn">
+                        <i class="fas fa-print mr-2"></i> طباعة
+                    </button>
+                    <input type="text" id="inspectionSearch" placeholder="ابحث برقم التسجيل..." class="p-2 border rounded search-input w-40 focus:w-64">
+                </div>
             </div>
-            <table class="w-full border-collapse">
-                <thead>
-                    <tr class="bg-indigo-600 text-white">
-                        <th class="p-3">رقم التسجيل</th>
-                        <th class="p-3">نوع المراقبة</th>
-                        <th class="p-3">ملاحظات</th>
-                        <th class="p-3">الملكية</th>
-                        <th class="p-3">تاريخ المراقبة</th>
-                        <th class="p-3">تاريخ الانتهاء</th>
-                        <th class="p-3">الأيام المتبقية</th>
-                        <th class="p-3">إجراءات</th>
-                    </tr>
-                </thead>
-                <tbody id="inspectionTableBody"></tbody>
-            </table>
+            <div id="inspectionTable">
+                <table class="w-full border-collapse">
+                    <thead>
+                        <tr class="bg-indigo-600 text-white">
+                            <th class="p-3">رقم التسجيل</th>
+                            <th class="p-3">نوع المراقبة</th>
+                            <th class="p-3">ملاحظات</th>
+                            <th class="p-3">الملكية</th>
+                            <th class="p-3">تاريخ المراقبة</th>
+                            <th class="p-3">تاريخ الانتهاء</th>
+                            <th class="p-3">الأيام المتبقية</th>
+                            <th class="p-3 no-print">إجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="inspectionTableBody"></tbody>
+                </table>
+            </div>
         </div>
 
         <!-- جدول صيانة قطع الغيار -->
         <div class="bg-white p-6 rounded-lg shadow-lg">
-            <div class="flex justify-between items-center mb-4">
+            <div class="flex justify-between items-center mb-4 no-print">
                 <h2 class="text-xl font-semibold text-gray-700"><i class="fas fa-tools mr-2"></i> سجل صيانة قطع الغيار</h2>
-                <input type="text" id="sparePartsSearch" placeholder="ابحث برقم التسجيل..." class="p-2 border rounded search-input w-40 focus:w-64">
+                <div>
+                    <button onclick="printTable('sparePartsTable', 'سجل صيانة قطع الغيار')" class="print-btn">
+                        <i class="fas fa-print mr-2"></i> طباعة
+                    </button>
+                    <input type="text" id="sparePartsSearch" placeholder="ابحث برقم التسجيل..." class="p-2 border rounded search-input w-40 focus:w-64">
+                </div>
             </div>
-            <table class="w-full border-collapse">
-                <thead>
-                    <tr class="bg-red-600 text-white">
-                        <th class="p-3">رقم التسجيل</th>
-                        <th class="p-3">الملكية</th>
-                        <th class="p-3">تاريخ الصيانة</th>
-                        <th class="p-3">ملاحظة (الغيار الذي تم تغييره)</th>
-                        <th class="p-3">السعر (دج)</th>
-                        <th class="p-3">إجراءات</th>
-                    </tr>
-                </thead>
-                <tbody id="sparePartsTableBody"></tbody>
-                <tfoot id="monthlyTotalRow">
-                    <!-- سيتم إضافة صف الإجمالي الشهري هنا عبر الجافاسكربت -->
-                </tfoot>
-            </table>
+            <div id="sparePartsTable">
+                <table class="w-full border-collapse">
+                    <thead>
+                        <tr class="bg-red-600 text-white">
+                            <th class="p-3">رقم التسجيل</th>
+                            <th class="p-3">الملكية</th>
+                            <th class="p-3">تاريخ الصيانة</th>
+                            <th class="p-3">ملاحظة (الغيار الذي تم تغييره)</th>
+                            <th class="p-3">السعر (دج)</th>
+                            <th class="p-3 no-print">إجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sparePartsTableBody"></tbody>
+                    <tfoot id="monthlyTotalRow">
+                        <!-- سيتم إضافة صف الإجمالي الشهري هنا عبر الجافاسكربت -->
+                    </tfoot>
+                </table>
+            </div>
         </div>
     </div>
 
     <!-- واجهة التأمينات -->
     <div id="insurancesView" class="container mx-auto p-6 max-w-6xl hidden">
-        <h1 class="text-3xl font-bold text-center text-gray-800 mb-6">
+        <h1 class="text-3xl font-bold text-center text-gray-800 mb-6 no-print">
             <i class="fas fa-shield-alt mr-2"></i> إدارة تأمينات المركبات والسلع
         </h1>
 
         <!-- فلترة البحث -->
-        <div class="bg-white p-4 rounded-lg shadow mb-6">
+        <div class="bg-white p-4 rounded-lg shadow mb-6 no-print">
             <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div class="flex-1">
                     <input type="text" id="insuranceSearch" placeholder="ابحث برقم التسجيل..." 
@@ -367,12 +427,15 @@
                     <button id="resetInsuranceFilters" class="bg-gray-200 text-gray-700 p-3 rounded hover:bg-gray-300">
                         <i class="fas fa-redo mr-1"></i> إعادة تعيين
                     </button>
+                    <button onclick="printTable('insurancesTable', 'سجل التأمينات')" class="print-btn">
+                        <i class="fas fa-print mr-1"></i> طباعة
+                    </button>
                 </div>
             </div>
         </div>
 
         <!-- جدول التأمينات -->
-        <div class="bg-white p-6 rounded-lg shadow-lg">
+        <div id="insurancesTable">
             <table class="w-full border-collapse">
                 <thead>
                     <tr class="bg-blue-600 text-white">
@@ -384,7 +447,7 @@
                         <th class="p-3">تاريخ الانتهاء</th>
                         <th class="p-3">الأيام المتبقية</th>
                         <th class="p-3">الحالة</th>
-                        <th class="p-3">إجراءات</th>
+                        <th class="p-3 no-print">إجراءات</th>
                     </tr>
                 </thead>
                 <tbody id="insurancesTableBody"></tbody>
@@ -419,6 +482,24 @@
         let inspections = [];
         let spareParts = [];
         let currentCompanyFilter = 'all';
+
+        // دالة الطباعة
+        function printTable(tableId, title) {
+            const printContents = document.getElementById(tableId).innerHTML;
+            const originalContents = document.body.innerHTML;
+            
+            document.body.innerHTML = `
+                <h1 style="text-align: center; margin-bottom: 20px;">${title}</h1>
+                ${printContents}
+                <div style="text-align: left; margin-top: 20px; font-size: 12px;">
+                    تم الطباعة في: ${new Date().toLocaleString()}
+                </div>
+            `;
+            
+            window.print();
+            document.body.innerHTML = originalContents;
+            location.reload();
+        }
 
         function showView(view) {
             document.getElementById('loginView').classList.add('hidden');
@@ -603,9 +684,8 @@
                         <option value="مقطورة">مقطورة</option>
                         <option value="سيارة تجارية FORGAN">سيارة تجارية FORGAN</option>
                         <option value="جرار">جرار</option>
-                                                <option value="دراجة نارية">دراجة نارية</option>
+                        <option value="دراجة نارية">دراجة نارية</option>
                         <option value="حافلة">حافلة</option>
-
                     </select>
                     <select id="swalCompany" class="swal2-select" required>
                         <option value="">اختر الشركة المالكة</option>
@@ -1314,7 +1394,7 @@
                         <td class="p-3">${insurance ? insurance.endDate : '-'}</td>
                         <td class="text-center p-3">${daysRemaining}</td>
                         <td class="text-center p-3">${status}</td>
-                        <td class="p-3">
+                        <td class="p-3 no-print">
                             <button onclick="editVehicle('${vehicle.id}')" class="action-btn text-blue-600 hover:text-blue-800 mr-2">
                                 <i class="fas fa-edit"></i>
                             </button>
@@ -1354,7 +1434,7 @@
                         <td class="p-3">${maintenance.oilChangeDate}</td>
                         <td class="p-3">${maintenance.currentMileage}</td>
                         <td class="p-3">${maintenance.nextMileage}</td>
-                        <td class="p-3">
+                        <td class="p-3 no-print">
                             <button onclick="editMaintenance('${maintenance.id}')" class="action-btn text-blue-600 hover:text-blue-800 mr-2">
                                 <i class="fas fa-edit"></i>
                             </button>
@@ -1411,7 +1491,7 @@
                         <td class="p-3">${inspection.inspectionDate}</td>
                         <td class="p-3">${inspection.endDate}</td>
                         <td class="p-3 text-center"><span class="px-2 py-1 rounded-full text-xs ${statusClass}">${daysRemaining}</span></td>
-                        <td class="p-3">
+                        <td class="p-3 no-print">
                             <button onclick="editInspection('${inspection.id}')" class="action-btn text-blue-600 hover:text-blue-800 mr-2">
                                 <i class="fas fa-edit"></i>
                             </button>
@@ -1462,7 +1542,7 @@
                     <td class="p-3">${sparePart.sparePartsDate}</td>
                     <td class="p-3">${sparePart.sparePartsNote}</td>
                     <td class="p-3">${sparePart.price ? sparePart.price + ' دج' : '-'}</td>
-                    <td class="p-3">
+                    <td class="p-3 no-print">
                         <button onclick="editSparePart('${sparePart.id}')" class="action-btn text-blue-600 hover:text-blue-800 mr-2">
                             <i class="fas fa-edit"></i>
                         </button>
@@ -1480,7 +1560,7 @@
                 <tr class="monthly-total">
                     <td class="p-3" colspan="4" style="text-align: left;">الإجمالي الشهري:</td>
                     <td class="p-3">${monthlyTotal} دج</td>
-                    <td class="p-3"></td>
+                    <td class="p-3 no-print"></td>
                 </tr>
             `;
         }
@@ -1559,7 +1639,7 @@
                         <td class="p-3">${insurance.endDate}</td>
                         <td class="p-3 text-center">${daysRemaining}</td>
                         <td class="p-3 text-center"><span class="px-2 py-1 rounded-full text-xs ${statusClass}">${status}</span></td>
-                        <td class="p-3">
+                        <td class="p-3 no-print">
                             <button onclick="editInsurance('${insurance.id}')" class="action-btn text-blue-600 hover:text-blue-800 mr-2">
                                 <i class="fas fa-edit"></i>
                             </button>
