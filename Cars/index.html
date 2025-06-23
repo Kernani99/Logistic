@@ -1,0 +1,1768 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام إدارة تأمينات وصيانة المركبات</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            transition: background-color 0.3s, color 0.3s ease;
+            min-height: 100vh;
+        }
+        .dark-mode {
+            background-color: #1a202c;
+            color: #e2e8f0;
+        }
+        .dark-mode .bg-white { background-color: #2d3748; }
+        .dark-mode .bg-gray-100 { background-color: #1a202c; }
+        .dark-mode .text-gray-700 { color: #e2e8f0; }
+        .dark-mode .bg-blue-600 { background-color: #3182ce; }
+        .dark-mode .bg-green-600 { background-color: #38a169; }
+        .dark-mode .bg-yellow-600 { background-color: #d69e2e; }
+        .dark-mode .bg-indigo-600 { background-color: #667eea; }
+        .expired { background-color: #fee2e2; }
+        .warning { background-color: #fef3c7; }
+        .stats-card { transition: transform 0.3s; }
+        .stats-card:hover { transform: scale(1.05); }
+        .navbar { background-color: #1e3a8a; }
+        .search-input { transition: width 0.3s; }
+        .search-input:focus { width: 300px; }
+        .login-container {
+            max-width: 400px;
+            margin: 100px auto;
+            padding: 2rem;
+            background-color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
+        }
+        .logo {
+            width: 80px;
+            margin: 0 auto;
+        }
+        .hidden { display: none; }
+        .action-btn {
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        .action-btn:hover {
+            transform: translateY(-2px);
+        }
+        .floating-buttons {
+            position: fixed;
+            bottom: 2rem;
+            left: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            z-index: 50;
+        }
+        .floating-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+        }
+        .floating-btn:hover {
+            transform: scale(1.1);
+        }
+        .company-badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+        .company-ibn-awf { background-color: #FFE4E1; color: #8B0000; }
+        .company-east-drelig { background-color: #E6E6FA; color: #4B0082; }
+        .company-algeria-ham { background-color: #F0FFF0; color: #006400; }
+        .company-ibrahim { background-color: #FFF0F5; color: #C71585; }
+        .company-personal { background-color: #E5E7EB; color: #1F2937; }
+        .filter-btn {
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        .filter-btn.active {
+            transform: scale(1.05);
+            box-shadow: 0 0 0 2px currentColor;
+        }
+        .insurance-type-badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+        .insurance-vehicle { background-color: #DBEAFE; color: #1E40AF; }
+        .insurance-goods { background-color: #D1FAE5; color: #065F46; }
+        .monthly-total {
+            background-color: #f8f9fa;
+            font-weight: bold;
+            border-top: 2px solid #dee2e6;
+        }
+        .print-btn {
+            background-color: #6b7280;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+            margin-right: 0.5rem;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+        }
+        .print-btn:hover {
+            background-color: #4b5563;
+            transform: translateY(-2px);
+        }
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            body {
+                background-color: white !important;
+                color: black !important;
+            }
+            table {
+                width: 100% !important;
+                font-size: 12px !important;
+            }
+            .bg-blue-600, .bg-yellow-600, .bg-indigo-600, .bg-red-600 {
+                color: white !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <!-- شريط التنقل -->
+    <nav id="navbar" class="navbar p-4 text-white shadow-lg hidden no-print">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <img src="https://brandlogos.net/wp-content/uploads/2022/10/sym_-_sanyang_motor-logo_brandlogos.net_mre4v.png" alt="Logo" class="h-12 w-auto">
+                <span class="text-xl font-bold hidden md:block">نظام إدارة المركبات</span>
+            </div>
+            <div class="flex items-center space-x-4">
+                <button id="dashboardNav" class="hover:text-blue-300 px-3 py-1 rounded transition">
+                    <i class="fas fa-car mr-1"></i> <span class="hidden md:inline">لوحة التحكم</span>
+                </button>
+                <button id="insurancesNav" class="hover:text-blue-300 px-3 py-1 rounded transition">
+                    <i class="fas fa-shield-alt mr-1"></i> <span class="hidden md:inline">التأمينات</span>
+                </button>
+                <button id="darkModeToggle" class="text-white hover:text-blue-300 p-2 rounded-full">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <button id="logout" class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded transition">
+                    <i class="fas fa-sign-out-alt mr-1"></i> <span class="hidden md:inline">تسجيل الخروج</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- واجهة تسجيل الدخول -->
+    <div id="loginView" class="login-container">
+        <img src="https://brandlogos.net/wp-content/uploads/2022/10/sym_-_sanyang_motor-logo_brandlogos.net_mre4v.png" alt="Logo" class="logo mb-4">
+        <h1 class="text-2xl font-bold text-center text-gray-800 mb-6">
+            <i class="fas fa-lock mr-2"></i> تسجيل الدخول
+        </h1>
+        <form id="loginForm" class="space-y-4">
+            <div>
+                <label for="username" class="block text-gray-700">اسم المستخدم</label>
+                <input type="text" id="username" placeholder="أدخل اسم المستخدم" class="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+            </div>
+            <div>
+                <label for="password" class="block text-gray-700">كلمة المرور</label>
+                <input type="password" id="password" placeholder="أدخل كلمة المرور" class="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+            </div>
+            <button type="submit" class="w-full bg-blue-600 text-white p-3 rounded hover:bg-blue-700 transition duration-300">
+                <i class="fas fa-sign-in-alt mr-2"></i> تسجيل الدخول
+            </button>
+        </form>
+    </div>
+
+    <!-- واجهة الإدارة -->
+    <div id="dashboardView" class="container mx-auto p-6 max-w-6xl hidden">
+        <!-- قسم الإحصائيات -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 no-print">
+            <div class="bg-white p-4 rounded-lg shadow-lg stats-card">
+                <h3 class="text-lg font-semibold text-gray-700"><i class="fas fa-car mr-2"></i> عدد المركبات</h3>
+                <p id="totalVehicles" class="text-2xl font-bold text-blue-600">0</p>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow-lg stats-card">
+                <h3 class="text-lg font-semibold text-gray-700"><i class="fas fa-exclamation-triangle mr-2"></i> تأمينات قريبة من الانتهاء</h3>
+                <p id="expiringInsurances" class="text-2xl font-bold text-yellow-600">0</p>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow-lg stats-card">
+                <h3 class="text-lg font-semibold text-gray-700"><i class="fas fa-oil-can mr-2"></i> صيانات زيت قريبة</h3>
+                <p id="upcomingMaintenances" class="text-2xl font-bold text-orange-600">0</p>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow-lg stats-card">
+                <h3 class="text-lg font-semibold text-gray-700"><i class="fas fa-car-crash mr-2"></i> المراقبة التقنية القريبة</h3>
+                <p id="upcomingInspections" class="text-2xl font-bold text-indigo-600">0</p>
+            </div>
+        </div>
+
+        <h1 class="text-3xl font-bold text-center text-gray-800 mb-6 no-print">
+            <i class="fas fa-car-side mr-2"></i> نظام إدارة المركبات
+        </h1>
+
+        <!-- زر تصدير إلى Excel -->
+        <div class="flex justify-end mb-4 no-print">
+            <button id="exportExcel" class="bg-purple-600 text-white p-3 rounded hover:bg-purple-700">
+                <i class="fas fa-file-excel mr-2"></i> تصدير إلى Excel
+            </button>
+        </div>
+
+        <!-- أزرار تصفية حسب الشركة -->
+        <div class="bg-white p-4 rounded-lg shadow mb-6 no-print">
+            <h3 class="text-lg font-semibold text-gray-700 mb-3"><i class="fas fa-filter mr-2"></i> تصفية حسب الشركة</h3>
+            <div class="flex flex-wrap gap-2">
+                <button data-company="all" class="filter-btn active bg-gray-200 text-gray-800 px-4 py-2 rounded-full">
+                    الكل
+                </button>
+                <button data-company="ابن عوف" class="filter-btn bg-red-100 text-red-800 px-4 py-2 rounded-full">
+                    ابن عوف
+                </button>
+                <button data-company="ايست دريليق" class="filter-btn bg-purple-100 text-purple-800 px-4 py-2 rounded-full">
+                    ايست دريليق
+                </button>
+                <button data-company="الجيريا هام موتورز" class="filter-btn bg-green-100 text-green-800 px-4 py-2 rounded-full">
+                    الجيريا هام موتورز
+                </button>
+                <button data-company="ابراهيم" class="filter-btn bg-pink-100 text-pink-800 px-4 py-2 rounded-full">
+                    ابراهيم
+                </button>
+                <button data-company="عتاد شخصي" class="filter-btn bg-gray-100 text-gray-800 px-4 py-2 rounded-full">
+                    عتاد شخصي
+                </button>
+            </div>
+        </div>
+
+        <!-- أزرار الإضافة العائمة -->
+        <div class="floating-buttons no-print">
+            <button id="addVehicleBtn" class="floating-btn bg-blue-600 text-white">
+                <i class="fas fa-car"></i>
+            </button>
+            <button id="addInsuranceBtn" class="floating-btn bg-green-600 text-white">
+                <i class="fas fa-shield-alt"></i>
+            </button>
+            <button id="addMaintenanceBtn" class="floating-btn bg-yellow-600 text-white">
+                <i class="fas fa-oil-can"></i>
+            </button>
+            <button id="addInspectionBtn" class="floating-btn bg-indigo-600 text-white">
+                <i class="fas fa-car-crash"></i>
+            </button>
+            <button id="addSparePartsBtn" class="floating-btn bg-red-600 text-white">
+                <i class="fas fa-tools"></i>
+            </button>
+        </div>
+
+        <!-- جدول المركبات -->
+        <div class="bg-white p-6 rounded-lg shadow-lg mb-6">
+            <div class="flex justify-between items-center mb-4 no-print">
+                <h2 class="text-xl font-semibold text-gray-700"><i class="fas fa-table mr-2"></i> قائمة المركبات</h2>
+                <div>
+                    <button onclick="printTable('vehiclesTable', 'قائمة المركبات')" class="print-btn">
+                        <i class="fas fa-print mr-2"></i> طباعة
+                    </button>
+                    <input type="text" id="vehicleSearch" placeholder="ابحث برقم التسجيل..." class="p-2 border rounded search-input w-40 focus:w-64">
+                </div>
+            </div>
+            <div id="vehiclesTable">
+                <table class="w-full border-collapse">
+                    <thead>
+                        <tr class="bg-blue-600 text-white">
+                            <th class="p-3">العلامة</th>
+                            <th class="p-3">النوع</th>
+                            <th class="p-3">رقم التسجيل</th>
+                            <th class="p-3">السائق</th>
+                            <th class="p-3">نوع المركبة</th>
+                            <th class="p-3">الملكية</th>
+                            <th class="p-3">تاريخ بداية التأمين</th>
+                            <th class="p-3">تاريخ نهاية التأمين</th>
+                            <th class="p-3">الأيام المتبقية</th>
+                            <th class="p-3">الحالة</th>
+                            <th class="p-3 no-print">إجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="vehiclesTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- جدول صيانة الزيوت -->
+        <div class="bg-white p-6 rounded-lg shadow-lg mb-6">
+            <div class="flex justify-between items-center mb-4 no-print">
+                <h2 class="text-xl font-semibold text-gray-700"><i class="fas fa-oil-can mr-2"></i> سجل صيانة الزيوت</h2>
+                <div>
+                    <button onclick="printTable('maintenanceTable', 'سجل صيانة الزيوت')" class="print-btn">
+                        <i class="fas fa-print mr-2"></i> طباعة
+                    </button>
+                    <input type="text" id="maintenanceSearch" placeholder="ابحث برقم التسجيل..." class="p-2 border rounded search-input w-40 focus:w-64">
+                </div>
+            </div>
+            <div id="maintenanceTable">
+                <table class="w-full border-collapse">
+                    <thead>
+                        <tr class="bg-yellow-600 text-white">
+                            <th class="p-3">رقم التسجيل</th>
+                            <th class="p-3">نوع الزيت</th>
+                            <th class="p-3">ملاحظات الصيانة</th>
+                            <th class="p-3">الملكية</th>
+                            <th class="p-3">تاريخ تغيير الزيت</th>
+                            <th class="p-3">عداد المركبة (كم)</th>
+                            <th class="p-3">عداد التغيير القادم (كم)</th>
+                            <th class="p-3 no-print">إجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="maintenanceTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- جدول المراقبة التقنية -->
+        <div class="bg-white p-6 rounded-lg shadow-lg mb-6">
+            <div class="flex justify-between items-center mb-4 no-print">
+                <h2 class="text-xl font-semibold text-gray-700"><i class="fas fa-car-crash mr-2"></i> سجل المراقبة التقنية</h2>
+                <div>
+                    <button onclick="printTable('inspectionTable', 'سجل المراقبة التقنية')" class="print-btn">
+                        <i class="fas fa-print mr-2"></i> طباعة
+                    </button>
+                    <input type="text" id="inspectionSearch" placeholder="ابحث برقم التسجيل..." class="p-2 border rounded search-input w-40 focus:w-64">
+                </div>
+            </div>
+            <div id="inspectionTable">
+                <table class="w-full border-collapse">
+                    <thead>
+                        <tr class="bg-indigo-600 text-white">
+                            <th class="p-3">رقم التسجيل</th>
+                            <th class="p-3">نوع المراقبة</th>
+                            <th class="p-3">ملاحظات</th>
+                            <th class="p-3">الملكية</th>
+                            <th class="p-3">تاريخ المراقبة</th>
+                            <th class="p-3">تاريخ الانتهاء</th>
+                            <th class="p-3">الأيام المتبقية</th>
+                            <th class="p-3 no-print">إجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="inspectionTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- جدول صيانة قطع الغيار -->
+        <div class="bg-white p-6 rounded-lg shadow-lg">
+            <div class="flex justify-between items-center mb-4 no-print">
+                <h2 class="text-xl font-semibold text-gray-700"><i class="fas fa-tools mr-2"></i> سجل صيانة قطع الغيار</h2>
+                <div>
+                    <button onclick="printTable('sparePartsTable', 'سجل صيانة قطع الغيار')" class="print-btn">
+                        <i class="fas fa-print mr-2"></i> طباعة
+                    </button>
+                    <input type="text" id="sparePartsSearch" placeholder="ابحث برقم التسجيل..." class="p-2 border rounded search-input w-40 focus:w-64">
+                </div>
+            </div>
+            <div id="sparePartsTable">
+                <table class="w-full border-collapse">
+                    <thead>
+                        <tr class="bg-red-600 text-white">
+                            <th class="p-3">رقم التسجيل</th>
+                            <th class="p-3">الملكية</th>
+                            <th class="p-3">تاريخ الصيانة</th>
+                            <th class="p-3">ملاحظة (الغيار الذي تم تغييره)</th>
+                            <th class="p-3">السعر (دج)</th>
+                            <th class="p-3 no-print">إجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sparePartsTableBody"></tbody>
+                    <tfoot id="monthlyTotalRow">
+                        <!-- سيتم إضافة صف الإجمالي الشهري هنا عبر الجافاسكربت -->
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- واجهة التأمينات -->
+    <div id="insurancesView" class="container mx-auto p-6 max-w-6xl hidden">
+        <h1 class="text-3xl font-bold text-center text-gray-800 mb-6 no-print">
+            <i class="fas fa-shield-alt mr-2"></i> إدارة تأمينات المركبات والسلع
+        </h1>
+
+        <!-- فلترة البحث -->
+        <div class="bg-white p-4 rounded-lg shadow mb-6 no-print">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div class="flex-1">
+                    <input type="text" id="insuranceSearch" placeholder="ابحث برقم التسجيل..." 
+                           class="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="flex space-x-2">
+                    <select id="insuranceTypeFilter" class="p-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="all">جميع الأنواع</option>
+                        <option value="تأمين مركبات">تأمين مركبات</option>
+                        <option value="تأمين سلع">تأمين سلع</option>
+                    </select>
+                    <select id="insuranceStatusFilter" class="p-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="all">جميع الحالات</option>
+                        <option value="active">فعال</option>
+                        <option value="expiring">قريب من الانتهاء</option>
+                        <option value="expired">منتهي</option>
+                    </select>
+                    <select id="insuranceCompanyFilter" class="p-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="all">جميع الشركات</option>
+                        <option value="ابن عوف">ابن عوف</option>
+                        <option value="ايست دريليق">ايست دريليق</option>
+                        <option value="الجيريا هام موتورز">الجيريا هام موتورز</option>
+                        <option value="ابراهيم">ابراهيم</option>
+                        <option value="عتاد شخصي">عتاد شخصي</option>
+                    </select>
+                    <button id="resetInsuranceFilters" class="bg-gray-200 text-gray-700 p-3 rounded hover:bg-gray-300">
+                        <i class="fas fa-redo mr-1"></i> إعادة تعيين
+                    </button>
+                    <button onclick="printTable('insurancesTable', 'سجل التأمينات')" class="print-btn">
+                        <i class="fas fa-print mr-1"></i> طباعة
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- جدول التأمينات -->
+        <div id="insurancesTable">
+            <table class="w-full border-collapse">
+                <thead>
+                    <tr class="bg-blue-600 text-white">
+                        <th class="p-3">رقم التسجيل</th>
+                        <th class="p-3">نوع التأمين</th>
+                        <th class="p-3">المركبة/السلعة</th>
+                        <th class="p-3">الملكية</th>
+                        <th class="p-3">تاريخ البدء</th>
+                        <th class="p-3">تاريخ الانتهاء</th>
+                        <th class="p-3">الأيام المتبقية</th>
+                        <th class="p-3">الحالة</th>
+                        <th class="p-3 no-print">إجراءات</th>
+                    </tr>
+                </thead>
+                <tbody id="insurancesTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+        import { getDatabase, ref, set, get, remove } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCq965bxM1CEYAsTlBuxk8cH8iiOL2EiZY",
+            authDomain: "issam-bf5e3.firebaseapp.com",
+            databaseURL: "https://issam-bf5e3-default-rtdb.firebaseio.com",
+            projectId: "issam-bf5e3",
+            storageBucket: "issam-bf5e3.appspot.com",
+            messagingSenderId: "87131430026",
+            appId: "1:87131430026:web:5ad0e5614839c36dac6173",
+            measurementId: "G-15XBD6NWQ2"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const database = getDatabase(app);
+
+        let currentView = 'login';
+        let vehicles = [];
+        let insurances = [];
+        let maintenances = [];
+        let inspections = [];
+        let spareParts = [];
+        let currentCompanyFilter = 'all';
+
+        // دالة الطباعة
+        function printTable(tableId, title) {
+            const printContents = document.getElementById(tableId).innerHTML;
+            const originalContents = document.body.innerHTML;
+            
+            document.body.innerHTML = `
+                <h1 style="text-align: center; margin-bottom: 20px;">${title}</h1>
+                ${printContents}
+                <div style="text-align: left; margin-top: 20px; font-size: 12px;">
+                    تم الطباعة في: ${new Date().toLocaleString()}
+                </div>
+            `;
+            
+            window.print();
+            document.body.innerHTML = originalContents;
+            location.reload();
+        }
+
+        function showView(view) {
+            document.getElementById('loginView').classList.add('hidden');
+            document.getElementById('dashboardView').classList.add('hidden');
+            document.getElementById('insurancesView').classList.add('hidden');
+            document.getElementById('navbar').classList.add('hidden');
+
+            if (view === 'login') {
+                document.getElementById('loginView').classList.remove('hidden');
+            } else {
+                document.getElementById('navbar').classList.remove('hidden');
+                if (view === 'dashboard') {
+                    document.getElementById('dashboardView').classList.remove('hidden');
+                } else if (view === 'insurances') {
+                    document.getElementById('insurancesView').classList.remove('hidden');
+                    renderInsurancesTable();
+                }
+            }
+            currentView = view;
+        }
+
+        // التحقق من حالة تسجيل الدخول
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                localStorage.setItem('isLoggedIn', 'true');
+                showView('dashboard');
+                loadData();
+            } else {
+                localStorage.removeItem('isLoggedIn');
+                showView('login');
+            }
+        });
+
+        // تسجيل الدخول
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const email = username === 'Issam' ? 'issam@symalgerie.dz' : username;
+                await signInWithEmailAndPassword(auth, email, password);
+                Swal.fire({
+                    icon: 'success',
+                    title: 'تم تسجيل الدخول',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+            } catch (error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'خطأ',
+                    text: 'اسم المستخدم أو كلمة المرور غير صحيحة: ' + error.message
+                });
+            }
+        });
+
+        // تسجيل الخروج
+        document.getElementById('logout').addEventListener('click', () => {
+            signOut(auth).then(() => {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'تم تسجيل الخروج',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+            });
+        });
+
+        // التنقل بين الواجهات
+        document.getElementById('dashboardNav').addEventListener('click', () => showView('dashboard'));
+        document.getElementById('insurancesNav').addEventListener('click', () => showView('insurances'));
+
+        // الوضع الليلي
+        document.getElementById('darkModeToggle').addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+        });
+
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.body.classList.add('dark-mode');
+        }
+
+        async function loadData() {
+            try {
+                const vehiclesSnapshot = await get(ref(database, 'vehicles'));
+                vehicles = vehiclesSnapshot.val() ? Object.entries(vehiclesSnapshot.val()).map(([id, data]) => ({ id, ...data })) : [];
+
+                const insurancesSnapshot = await get(ref(database, 'insurances'));
+                insurances = insurancesSnapshot.val() ? Object.entries(insurancesSnapshot.val()).map(([id, data]) => ({ id, ...data })) : [];
+
+                const maintenancesSnapshot = await get(ref(database, 'maintenances'));
+                maintenances = maintenancesSnapshot.val() ? Object.entries(maintenancesSnapshot.val()).map(([id, data]) => ({ id, ...data })) : [];
+
+                const inspectionsSnapshot = await get(ref(database, 'SCANER'));
+                inspections = inspectionsSnapshot.val() ? Object.entries(inspectionsSnapshot.val()).map(([id, data]) => ({ id, ...data })) : [];
+
+                const sparePartsSnapshot = await get(ref(database, 'spareParts'));
+                spareParts = sparePartsSnapshot.val() ? Object.entries(sparePartsSnapshot.val()).map(([id, data]) => ({ id, ...data })) : [];
+
+                updateVehicleSelects();
+                renderTables();
+                updateStats();
+            } catch (error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'خطأ',
+                    text: 'حدث خطأ أثناء جلب البيانات: ' + error.message
+                });
+            }
+        }
+
+        function updateVehicleSelects() {
+            const selects = [
+                document.getElementById('vehicleSelect'),
+                document.getElementById('maintenanceVehicleSelect'),
+                document.getElementById('inspectionVehicleSelect'),
+                document.getElementById('sparePartsVehicleSelect'),
+                document.getElementById('swalVehicleSelect'),
+                document.getElementById('swalMaintenanceVehicleSelect'),
+                document.getElementById('swalInspectionVehicleSelect'),
+                document.getElementById('swalSparePartsVehicleSelect')
+            ];
+            selects.forEach(select => {
+                if (select) {
+                    select.innerHTML = '<option value="">اختر المركبة</option>';
+                    vehicles.forEach(vehicle => {
+                        const option = document.createElement('option');
+                        option.value = vehicle.plateNumber;
+                        option.textContent = `${vehicle.plateNumber} (${vehicle.vehicleType})`;
+                        select.appendChild(option);
+                    });
+                }
+            });
+        }
+
+        function updateStats() {
+            document.getElementById('totalVehicles').textContent = vehicles.length;
+            
+            const expiringInsurances = insurances.filter(ins => {
+                const daysRemaining = getDaysRemaining(ins.endDate);
+                return daysRemaining <= 7 && daysRemaining >= 0;
+            }).length;
+            document.getElementById('expiringInsurances').textContent = expiringInsurances;
+            
+            const upcomingMaintenances = maintenances.filter(m => {
+                const mileageDiff = m.nextMileage - m.currentMileage;
+                return mileageDiff <= 500;
+            }).length;
+            document.getElementById('upcomingMaintenances').textContent = upcomingMaintenances;
+            
+            const upcomingInspections = inspections.filter(ins => {
+                const daysRemaining = getDaysRemaining(ins.endDate);
+                return daysRemaining <= 30 && daysRemaining >= 0;
+            }).length;
+            document.getElementById('upcomingInspections').textContent = upcomingInspections;
+        }
+
+        // تصفية حسب الشركة
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentCompanyFilter = btn.dataset.company;
+                renderTables();
+            });
+        });
+
+        // عرض نموذج إضافة مركبة
+        document.getElementById('addVehicleBtn').addEventListener('click', () => {
+            Swal.fire({
+                title: 'إضافة مركبة جديدة',
+                html: `
+                    <input type="text" id="swalBrand" placeholder="العلامة التجارية" class="swal2-input" required>
+                    <input type="text" id="swalModel" placeholder="النوع" class="swal2-input" required>
+                    <input type="text" id="swalPlateNumber" placeholder="رقم التسجيل" class="swal2-input" required>
+                    <input type="text" id="swalDriverName" placeholder="اسم السائق" class="swal2-input" required>
+                    <select id="swalVehicleType" class="swal2-select" required>
+                        <option value="سيارة">سيارة</option>
+                        <option value="شاحنة">شاحنة</option>
+                        <option value="آلة شوكية">آلة شوكية</option>
+                        <option value="مقطورة">مقطورة</option>
+                        <option value="سيارة تجارية FORGAN">سيارة تجارية FORGAN</option>
+                        <option value="جرار">جرار</option>
+                        <option value="دراجة نارية">دراجة نارية</option>
+                        <option value="حافلة">حافلة</option>
+                    </select>
+                    <select id="swalCompany" class="swal2-select" required>
+                        <option value="">اختر الشركة المالكة</option>
+                        <option value="ابن عوف">ابن عوف</option>
+                        <option value="ايست دريليق">ايست دريليق</option>
+                        <option value="الجيريا هام موتورز">الجيريا هام موتورز</option>
+                        <option value="ابراهيم">ابراهيم</option>
+                        <option value="عتاد شخصي">عتاد شخصي</option>
+                    </select>
+                `,
+                focusConfirm: false,
+                showCancelButton: true,
+                confirmButtonText: 'حفظ',
+                cancelButtonText: 'إلغاء',
+                preConfirm: async () => {
+                    const vehicle = {
+                        brand: document.getElementById('swalBrand').value,
+                        model: document.getElementById('swalModel').value,
+                        plateNumber: document.getElementById('swalPlateNumber').value,
+                        driverName: document.getElementById('swalDriverName').value,
+                        vehicleType: document.getElementById('swalVehicleType').value,
+                        company: document.getElementById('swalCompany').value
+                    };
+
+                    if (!vehicle.brand || !vehicle.model || !vehicle.plateNumber || !vehicle.driverName || !vehicle.company) {
+                        Swal.showValidationMessage('جميع الحقول مطلوبة');
+                        return false;
+                    }
+
+                    try {
+                        await set(ref(database, 'vehicles/' + vehicle.plateNumber), vehicle);
+                        vehicles.push({ id: vehicle.plateNumber, ...vehicle });
+                        updateVehicleSelects();
+                        renderTables();
+                        updateStats();
+                        return true;
+                    } catch (error) {
+                        Swal.showValidationMessage('حدث خطأ أثناء الإضافة: ' + error.message);
+                        return false;
+                    }
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'تمت الإضافة',
+                        text: 'تم إضافة المركبة بنجاح!'
+                    });
+                }
+            });
+        });
+
+        // عرض نموذج إضافة تأمين
+        document.getElementById('addInsuranceBtn').addEventListener('click', () => {
+            Swal.fire({
+                title: 'إضافة تأمين جديد',
+                html: `
+                    <select id="swalVehicleSelect" class="swal2-select">
+                        <option value="">اختر المركبة (اختياري للسلع)</option>
+                        ${vehicles.map(v => `<option value="${v.plateNumber}">${v.plateNumber} (${v.vehicleType})</option>`).join('')}
+                    </select>
+                    <select id="swalInsuranceType" class="swal2-select" required>
+                        <option value="تأمين مركبات">تأمين مركبات</option>
+                        <option value="تأمين سلع">تأمين سلع</option>
+                    </select>
+                    <input type="date" id="swalInsuranceStart" class="swal2-input" required>
+                    <input type="date" id="swalInsuranceEnd" class="swal2-input" required>
+                `,
+                focusConfirm: false,
+                showCancelButton: true,
+                confirmButtonText: 'حفظ',
+                cancelButtonText: 'إلغاء',
+                preConfirm: async () => {
+                    const insurance = {
+                        plateNumber: document.getElementById('swalVehicleSelect').value,
+                        insuranceType: document.getElementById('swalInsuranceType').value,
+                        startDate: document.getElementById('swalInsuranceStart').value,
+                        endDate: document.getElementById('swalInsuranceEnd').value
+                    };
+
+                    if (!insurance.startDate || !insurance.endDate) {
+                        Swal.showValidationMessage('تاريخ البداية والنهاية مطلوبان');
+                        return false;
+                    }
+
+                    const id = Date.now().toString();
+
+                    try {
+                        await set(ref(database, 'insurances/' + id), insurance);
+                        insurances.push({ id, ...insurance });
+                        renderTables();
+                        renderInsurancesTable();
+                        updateStats();
+                        return true;
+                    } catch (error) {
+                        Swal.showValidationMessage('حدث خطأ أثناء الإضافة: ' + error.message);
+                        return false;
+                    }
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'تمت الإضافة',
+                        text: 'تم إضافة التأمين بنجاح!'
+                    });
+                }
+            });
+        });
+
+        // عرض نموذج إضافة صيانة زيت
+        document.getElementById('addMaintenanceBtn').addEventListener('click', () => {
+            Swal.fire({
+                title: 'إضافة صيانة زيت',
+                html: `
+                    <select id="swalMaintenanceVehicleSelect" class="swal2-select" required>
+                        <option value="">اختر المركبة</option>
+                        ${vehicles.map(v => `<option value="${v.plateNumber}">${v.plateNumber} (${v.vehicleType})</option>`).join('')}
+                    </select>
+                    <input type="text" id="swalOilType" placeholder="نوع الزيت المضاف" class="swal2-input" required>
+                    <input type="text" id="swalMaintenanceNotes" placeholder="ملاحظة (القطع التي تم تغييرها)" class="swal2-input">
+                    <input type="date" id="swalOilChangeDate" class="swal2-input" required>
+                    <input type="number" id="swalCurrentMileage" placeholder="عداد المركبة الحالي (كم)" class="swal2-input" required>
+                    <input type="number" id="swalNextMileage" placeholder="عداد تغيير الزيت القادم (كم)" class="swal2-input" required>
+                `,
+                focusConfirm: false,
+                showCancelButton: true,
+                confirmButtonText: 'حفظ',
+                cancelButtonText: 'إلغاء',
+                preConfirm: async () => {
+                    const maintenance = {
+                        plateNumber: document.getElementById('swalMaintenanceVehicleSelect').value,
+                        oilType: document.getElementById('swalOilType').value,
+                        maintenanceNotes: document.getElementById('swalMaintenanceNotes').value,
+                        oilChangeDate: document.getElementById('swalOilChangeDate').value,
+                        currentMileage: parseInt(document.getElementById('swalCurrentMileage').value),
+                        nextMileage: parseInt(document.getElementById('swalNextMileage').value)
+                    };
+
+                    if (!maintenance.plateNumber || !maintenance.oilType || !maintenance.oilChangeDate || !maintenance.currentMileage || !maintenance.nextMileage) {
+                        Swal.showValidationMessage('جميع الحقول مطلوبة عدا الملاحظة');
+                        return false;
+                    }
+
+                    const id = Date.now().toString();
+
+                    try {
+                        await set(ref(database, 'maintenances/' + id), maintenance);
+                        maintenances.push({ id, ...maintenance });
+                        renderTables();
+                        updateStats();
+                        return true;
+                    } catch (error) {
+                        Swal.showValidationMessage('حدث خطأ أثناء الإضافة: ' + error.message);
+                        return false;
+                    }
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'تمت الإضافة',
+                        text: 'تم إضافة سجل صيانة الزيت بنجاح!'
+                    });
+                }
+            });
+        });
+
+        // عرض نموذج إضافة مراقبة تقنية
+        document.getElementById('addInspectionBtn').addEventListener('click', () => {
+            Swal.fire({
+                title: 'إضافة مراقبة تقنية',
+                html: `
+                    <select id="swalInspectionVehicleSelect" class="swal2-select" required>
+                        <option value="">اختر المركبة</option>
+                        ${vehicles.map(v => `<option value="${v.plateNumber}">${v.plateNumber} (${v.vehicleType})</option>`).join('')}
+                    </select>
+                    <select id="swalInspectionType" class="swal2-select" required>
+                        <option value="مراقبة دورية">مراقبة دورية</option>
+                        <option value="مراقبة استثنائية">مراقبة استثنائية</option>
+                    </select>
+                    <input type="text" id="swalInspectionNotes" placeholder="ملاحظات" class="swal2-input">
+                    <input type="date" id="swalInspectionDate" class="swal2-input" required>
+                    <input type="date" id="swalInspectionEndDate" class="swal2-input" required>
+                `,
+                focusConfirm: false,
+                showCancelButton: true,
+                confirmButtonText: 'حفظ',
+                cancelButtonText: 'إلغاء',
+                preConfirm: async () => {
+                    const inspection = {
+                        plateNumber: document.getElementById('swalInspectionVehicleSelect').value,
+                        inspectionType: document.getElementById('swalInspectionType').value,
+                        notes: document.getElementById('swalInspectionNotes').value,
+                        inspectionDate: document.getElementById('swalInspectionDate').value,
+                        endDate: document.getElementById('swalInspectionEndDate').value
+                    };
+
+                    if (!inspection.plateNumber || !inspection.inspectionDate || !inspection.endDate) {
+                        Swal.showValidationMessage('الحقول المطلوبة: المركبة، تاريخ المراقبة، تاريخ الانتهاء');
+                        return false;
+                    }
+
+                    const id = Date.now().toString();
+
+                    try {
+                        await set(ref(database, 'SCANER/' + id), inspection);
+                        inspections.push({ id, ...inspection });
+                        renderTables();
+                        updateStats();
+                        return true;
+                    } catch (error) {
+                        Swal.showValidationMessage('حدث خطأ أثناء الإضافة: ' + error.message);
+                        return false;
+                    }
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'تمت الإضافة',
+                        text: 'تم إضافة سجل المراقبة التقنية بنجاح!'
+                    });
+                }
+            });
+        });
+
+        // عرض نموذج إضافة صيانة قطع غيار
+        document.getElementById('addSparePartsBtn').addEventListener('click', () => {
+            Swal.fire({
+                title: 'إضافة صيانة قطع غيار',
+                html: `
+                    <select id="swalSparePartsVehicleSelect" class="swal2-select" required>
+                        <option value="">اختر المركبة</option>
+                        ${vehicles.map(v => `<option value="${v.plateNumber}">${v.plateNumber} (${v.vehicleType})</option>`).join('')}
+                    </select>
+                    <input type="date" id="swalSparePartsDate" class="swal2-input" required>
+                    <input type="text" id="swalSparePartsNote" placeholder="ملاحظة (الغيار الذي تم تغييره)" class="swal2-input" required>
+                    <input type="number" id="swalSparePartsPrice" placeholder="السعر (دج)" class="swal2-input" required>
+                `,
+                focusConfirm: false,
+                showCancelButton: true,
+                confirmButtonText: 'حفظ',
+                cancelButtonText: 'إلغاء',
+                preConfirm: async () => {
+                    const sparePart = {
+                        plateNumber: document.getElementById('swalSparePartsVehicleSelect').value,
+                        sparePartsDate: document.getElementById('swalSparePartsDate').value,
+                        sparePartsNote: document.getElementById('swalSparePartsNote').value,
+                        price: parseInt(document.getElementById('swalSparePartsPrice').value) || 0
+                    };
+
+                    if (!sparePart.plateNumber || !sparePart.sparePartsDate || !sparePart.sparePartsNote || !sparePart.price) {
+                        Swal.showValidationMessage('جميع الحقول مطلوبة');
+                        return false;
+                    }
+
+                    const id = Date.now().toString();
+
+                    try {
+                        await set(ref(database, 'spareParts/' + id), sparePart);
+                        spareParts.push({ id, ...sparePart });
+                        renderTables();
+                        return true;
+                    } catch (error) {
+                        Swal.showValidationMessage('حدث خطأ أثناء الإضافة: ' + error.message);
+                        return false;
+                    }
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'تمت الإضافة',
+                        text: 'تم إضافة سجل قطع الغيار بنجاح!'
+                    });
+                }
+            });
+        });
+
+        // حذف مركبة
+        window.deleteVehicle = async function(id) {
+            const vehicle = vehicles.find(v => v.id === id);
+            if (!vehicle) return;
+
+            Swal.fire({
+                title: 'هل أنت متأكد؟',
+                text: `سيتم حذف المركبة ${vehicle.plateNumber} وجميع البيانات المرتبطة بها!`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'نعم، احذف!',
+                cancelButtonText: 'إلغاء'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    try {
+                        await remove(ref(database, 'vehicles/' + id));
+                        vehicles = vehicles.filter(v => v.id !== id);
+                        insurances = insurances.filter(i => i.plateNumber !== vehicle.plateNumber);
+                        maintenances = maintenances.filter(m => m.plateNumber !== vehicle.plateNumber);
+                        inspections = inspections.filter(ins => ins.plateNumber !== vehicle.plateNumber);
+                        spareParts = spareParts.filter(s => s.plateNumber !== vehicle.plateNumber);
+
+                        await Promise.all([
+                            ...insurances.map(i => remove(ref(database, 'insurances/' + i.id))),
+                            ...maintenances.map(m => remove(ref(database, 'maintenances/' + m.id))),
+                            ...inspections.map(ins => remove(ref(database, 'SCANER/' + ins.id))),
+                            ...spareParts.map(s => remove(ref(database, 'spareParts/' + s.id)))
+                        ]);
+
+                        updateVehicleSelects();
+                        renderTables();
+                        renderInsurancesTable();
+                        updateStats();
+                        Swal.fire('تم الحذف!', 'تم حذف المركبة بنجاح.', 'success');
+                    } catch (error) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'خطأ',
+                            text: 'حدث خطأ أثناء الحذف: ' + error.message
+                        });
+                    }
+                }
+            });
+        };
+
+        // تعديل مركبة
+        window.editVehicle = function(id) {
+            const vehicle = vehicles.find(v => v.id === id);
+            if (!vehicle) return;
+
+            Swal.fire({
+                title: 'تعديل المركبة',
+                html: `
+                    <input id="editBrand" class="swal2-input" value="${vehicle.brand}" placeholder="العلامة">
+                    <input id="editModel" class="swal2-input" value="${vehicle.model}" placeholder="النوع">
+                    <input id="editPlateNumber" class="swal2-input" value="${vehicle.plateNumber}" placeholder="رقم التسجيل">
+                    <input id="editDriverName" class="swal2-input" value="${vehicle.driverName}" placeholder="اسم السائق">
+                    <select id="editVehicleType" class="swal2-select">
+                        <option value="سيارة" ${vehicle.vehicleType === 'سيارة' ? 'selected' : ''}>سيارة</option>
+                        <option value="شاحنة" ${vehicle.vehicleType === 'شاحنة' ? 'selected' : ''}>شاحنة</option>
+                        <option value="آلة شوكية" ${vehicle.vehicleType === 'آلة شوكية' ? 'selected' : ''}>آلة شوكية</option>
+                        <option value="مقطورة" ${vehicle.vehicleType === 'مقطورة' ? 'selected' : ''}>مقطورة</option>
+                        <option value="سيارة تجارية FORGAN" ${vehicle.vehicleType === 'سيارة تجارية FORGAN' ? 'selected' : ''}>سيارة تجارية FORGAN</option>
+                        <option value="جرار" ${vehicle.vehicleType === 'جرار' ? 'selected' : ''}>جرار</option>
+                    </select>
+                    <select id="editCompany" class="swal2-select">
+                        <option value="ابن عوف" ${vehicle.company === 'ابن عوف' ? 'selected' : ''}>ابن عوف</option>
+                        <option value="ايست دريليق" ${vehicle.company === 'ايست دريليق' ? 'selected' : ''}>ايست دريليق</option>
+                        <option value="الجيريا هام موتورز" ${vehicle.company === 'الجيريا هام موتورز' ? 'selected' : ''}>الجيريا هام موتورز</option>
+                        <option value="ابراهيم" ${vehicle.company === 'ابراهيم' ? 'selected' : ''}>ابراهيم</option>
+                        <option value="عتاد شخصي" ${vehicle.company === 'عتاد شخصي' ? 'selected' : ''}>عتاد شخصي</option>
+                    </select>
+                `,
+                showCancelButton: true,
+                confirmButtonText: 'حفظ',
+                cancelButtonText: 'إلغاء',
+                preConfirm: async () => {
+                    const updatedVehicle = {
+                        brand: document.getElementById('editBrand').value,
+                        model: document.getElementById('editModel').value,
+                        plateNumber: document.getElementById('editPlateNumber').value,
+                        driverName: document.getElementById('editDriverName').value,
+                        vehicleType: document.getElementById('editVehicleType').value,
+                        company: document.getElementById('editCompany').value
+                    };
+
+                    try {
+                        await set(ref(database, 'vehicles/' + id), updatedVehicle);
+                        const index = vehicles.findIndex(v => v.id === id);
+                        vehicles[index] = { id, ...updatedVehicle };
+                        updateVehicleSelects();
+                        renderTables();
+                        renderInsurancesTable();
+                        Swal.fire('تم التعديل!', 'تم تعديل المركبة بنجاح.', 'success');
+                    } catch (error) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'خطأ',
+                            text: 'حدث خطأ أثناء التعديل: ' + error.message
+                        });
+                    }
+                }
+            });
+        };
+
+        // تعديل صيانة الزيت
+        window.editMaintenance = function(id) {
+            const maintenance = maintenances.find(m => m.id === id);
+            if (!maintenance) return;
+
+            Swal.fire({
+                title: 'تعديل صيانة الزيت',
+                html: `
+                    <select id="editMaintenancePlate" class="swal2-select">
+                        <option value="">اختر المركبة</option>
+                        ${vehicles.map(v => `<option value="${v.plateNumber}" ${maintenance.plateNumber === v.plateNumber ? 'selected' : ''}>${v.plateNumber} (${v.vehicleType})</option>`).join('')}
+                    </select>
+                    <input id="editOilType" type="text" class="swal2-input" value="${maintenance.oilType || ''}" placeholder="نوع الزيت">
+                    <input id="editMaintenanceNotes" type="text" class="swal2-input" value="${maintenance.maintenanceNotes || ''}" placeholder="ملاحظات الصيانة">
+                    <input id="editOilChangeDate" type="date" class="swal2-input" value="${maintenance.oilChangeDate}">
+                    <input id="editCurrentMileage" type="number" class="swal2-input" value="${maintenance.currentMileage}" placeholder="عداد المركبة الحالي (كم)">
+                    <input id="editNextMileage" type="number" class="swal2-input" value="${maintenance.nextMileage}" placeholder="عداد التغيير القادم (كم)">
+                `,
+                showCancelButton: true,
+                confirmButtonText: 'حفظ',
+                cancelButtonText: 'إلغاء',
+                preConfirm: async () => {
+                    const updatedMaintenance = {
+                        plateNumber: document.getElementById('editMaintenancePlate').value,
+                        oilType: document.getElementById('editOilType').value,
+                        maintenanceNotes: document.getElementById('editMaintenanceNotes').value,
+                        oilChangeDate: document.getElementById('editOilChangeDate').value,
+                        currentMileage: parseInt(document.getElementById('editCurrentMileage').value),
+                        nextMileage: parseInt(document.getElementById('editNextMileage').value)
+                    };
+
+                    try {
+                        await set(ref(database, 'maintenances/' + id), updatedMaintenance);
+                        const index = maintenances.findIndex(m => m.id === id);
+                        maintenances[index] = { id, ...updatedMaintenance };
+                        renderTables();
+                        updateStats();
+                        Swal.fire('تم التعديل!', 'تم تعديل صيانة الزيت بنجاح.', 'success');
+                    } catch (error) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'خطأ',
+                            text: 'حدث خطأ أثناء التعديل: ' + error.message
+                        });
+                    }
+                }
+            });
+        };
+
+        // تعديل مراقبة تقنية
+        window.editInspection = function(id) {
+            const inspection = inspections.find(ins => ins.id === id);
+            if (!inspection) return;
+
+            Swal.fire({
+                title: 'تعديل المراقبة التقنية',
+                html: `
+                    <select id="editInspectionPlate" class="swal2-select">
+                        <option value="">اختر المركبة</option>
+                        ${vehicles.map(v => `<option value="${v.plateNumber}" ${inspection.plateNumber === v.plateNumber ? 'selected' : ''}>${v.plateNumber} (${v.vehicleType})</option>`).join('')}
+                    </select>
+                    <select id="editInspectionType" class="swal2-select">
+                        <option value="مراقبة دورية" ${inspection.inspectionType === 'مراقبة دورية' ? 'selected' : ''}>مراقبة دورية</option>
+                        <option value="مراقبة استثنائية" ${inspection.inspectionType === 'مراقبة استثنائية' ? 'selected' : ''}>مراقبة استثنائية</option>
+                    </select>
+                    <input id="editInspectionNotes" type="text" class="swal2-input" value="${inspection.notes || ''}" placeholder="ملاحظات">
+                    <input id="editInspectionDate" type="date" class="swal2-input" value="${inspection.inspectionDate}">
+                    <input id="editInspectionEndDate" type="date" class="swal2-input" value="${inspection.endDate}">
+                `,
+                showCancelButton: true,
+                confirmButtonText: 'حفظ',
+                cancelButtonText: 'إلغاء',
+                preConfirm: async () => {
+                    const updatedInspection = {
+                        plateNumber: document.getElementById('editInspectionPlate').value,
+                        inspectionType: document.getElementById('editInspectionType').value,
+                        notes: document.getElementById('editInspectionNotes').value,
+                        inspectionDate: document.getElementById('editInspectionDate').value,
+                        endDate: document.getElementById('editInspectionEndDate').value
+                    };
+
+                    try {
+                        await set(ref(database, 'SCANER/' + id), updatedInspection);
+                        const index = inspections.findIndex(ins => ins.id === id);
+                        inspections[index] = { id, ...updatedInspection };
+                        renderTables();
+                        updateStats();
+                        Swal.fire('تم التعديل!', 'تم تعديل المراقبة التقنية بنجاح.', 'success');
+                    } catch (error) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'خطأ',
+                            text: 'حدث خطأ أثناء التعديل: ' + error.message
+                        });
+                    }
+                }
+            });
+        };
+
+        // تعديل قطع غيار
+        window.editSparePart = function(id) {
+            const sparePart = spareParts.find(s => s.id === id);
+            if (!sparePart) return;
+
+            Swal.fire({
+                title: 'تعديل صيانة قطع غيار',
+                html: `
+                    <select id="editSparePartPlate" class="swal2-select">
+                        <option value="">اختر المركبة</option>
+                        ${vehicles.map(v => `<option value="${v.plateNumber}" ${sparePart.plateNumber === v.plateNumber ? 'selected' : ''}>${v.plateNumber} (${v.vehicleType})</option>`).join('')}
+                    </select>
+                    <input type="date" id="editSparePartsDate" class="swal2-input" value="${sparePart.sparePartsDate}">
+                    <input type="text" id="editSparePartsNote" class="swal2-input" value="${sparePart.sparePartsNote}" placeholder="ملاحظة">
+                    <input type="number" id="editSparePartsPrice" class="swal2-input" value="${sparePart.price || 0}" placeholder="السعر (دج)">
+                `,
+                showCancelButton: true,
+                confirmButtonText: 'حفظ',
+                cancelButtonText: 'إلغاء',
+                preConfirm: async () => {
+                    const updatedSparePart = {
+                        plateNumber: document.getElementById('editSparePartPlate').value,
+                        sparePartsDate: document.getElementById('editSparePartsDate').value,
+                        sparePartsNote: document.getElementById('editSparePartsNote').value,
+                        price: parseInt(document.getElementById('editSparePartsPrice').value) || 0
+                    };
+
+                    try {
+                        await set(ref(database, 'spareParts/' + id), updatedSparePart);
+                        const index = spareParts.findIndex(s => s.id === id); 
+                        spareParts[index] = { id, ...updatedSparePart };
+                        renderTables();
+                        Swal.fire('تم التعديل!', 'تم تعديل سجل قطع الغيار بنجاح.', 'success');
+                    } catch (error) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'خطأ',
+                            text: 'حدث خطأ أثناء التعديل: ' + error.message
+                        });
+                    }
+                }
+            });
+        };
+
+        // تعديل تأمين
+        window.editInsurance = function(id) {
+            const insurance = insurances.find(i => i.id === id);
+            if (!insurance) return;
+
+            Swal.fire({
+                title: 'تعديل التأمين',
+                html: `
+                    <select id="editInsurancePlate" class="swal2-select">
+                        <option value="">اختر المركبة (اختياري للسلع)</option>
+                        ${vehicles.map(v => `<option value="${v.plateNumber}" ${insurance.plateNumber === v.plateNumber ? 'selected' : ''}>${v.plateNumber} (${v.vehicleType})</option>`).join('')}
+                    </select>
+                    <select id="editInsuranceType" class="swal2-select">
+                        <option value="تأمين مركبات" ${insurance.insuranceType === 'تأمين مركبات' ? 'selected' : ''}>تأمين مركبات</option>
+                        <option value="تأمين سلع" ${insurance.insuranceType === 'تأمين سلع' ? 'selected' : ''}>تأمين سلع</option>
+                    </select>
+                    <input type="date" id="editInsuranceStart" class="swal2-input" value="${insurance.startDate}">
+                    <input type="date" id="editInsuranceEnd" class="swal2-input" value="${insurance.endDate}">
+                `,
+                showCancelButton: true,
+                confirmButtonText: 'حفظ',
+                cancelButtonText: 'إلغاء',
+                preConfirm: async () => {
+                    const updatedInsurance = {
+                        plateNumber: document.getElementById('editInsurancePlate').value,
+                        insuranceType: document.getElementById('editInsuranceType').value,
+                        startDate: document.getElementById('editInsuranceStart').value,
+                        endDate: document.getElementById('editInsuranceEnd').value
+                    };
+
+                    try {
+                        await set(ref(database, 'insurances/' + id), updatedInsurance);
+                        const index = insurances.findIndex(i => i.id === id);
+                        insurances[index] = { id, ...updatedInsurance };
+                        renderTables();
+                        renderInsurancesTable();
+                        updateStats();
+                        Swal.fire('تم التعديل!', 'تم تعديل التأمين بنجاح.', 'success');
+                    } catch (error) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'خطأ',
+                            text: 'حدث خطأ أثناء التعديل: ' + error.message
+                        });
+                    }
+                }
+            });
+        };
+
+        // حساب الأيام المتبقية
+        function getDaysRemaining(endDate) {
+            const today = new Date();
+            const end = new Date(endDate);
+            const diffTime = end - today;
+            return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        }
+
+        // تصدير إلى Excel
+        document.getElementById('exportExcel').addEventListener('click', () => {
+            const vehicleData = vehicles.map(vehicle => {
+                const insurance = insurances.find(ins => ins.plateNumber === vehicle.plateNumber);
+                const maintenance = maintenances.filter(m => m.plateNumber === vehicle.plateNumber);
+                const inspection = inspections.find(ins => ins.plateNumber === vehicle.plateNumber);
+                const sparePart = spareParts.filter(s => s.plateNumber === vehicle.plateNumber);
+                return {
+                    'العلامة': vehicle.brand,
+                    'النوع': vehicle.model,
+                    'رقم التسجيل': vehicle.plateNumber,
+                    'السائق': vehicle.driverName,
+                    'نوع المركبة': vehicle.vehicleType,
+                    'الملكية': vehicle.company,
+                    'تاريخ بداية التأمين': insurance ? insurance.startDate : '-',
+                    'تاريخ نهاية التأمين': insurance ? insurance.endDate : '-',
+                    'الأيام المتبقية للتأمين': insurance ? getDaysRemaining(insurance.endDate) : '-',
+                    'حالة التأمين': insurance ? (getDaysRemaining(insurance.endDate) <= 0 ? 'منتهي' : getDaysRemaining(insurance.endDate) <= 7 ? 'قريب من الانتهاء' : 'فعال') : '-',
+                    'تاريخ تغيير الزيت': maintenance.length ? maintenance.map(m => m.oilChangeDate).join(', ') : '-',
+                    'نوع الزيت': maintenance.length ? maintenance.map(m => m.oilType).join(', ') : '-',
+                    'ملاحظات الصيانة': maintenance.length ? maintenance.map(m => m.maintenanceNotes).join(', ') : '-',
+                    'عداد المركبة (كم)': maintenance.length ? maintenance.map(m => m.currentMileage).join(', ') : '-',
+                    'عداد التغيير القادم (كم)': maintenance.length ? maintenance.map(m => m.nextMileage).join(', ') : '-',
+                    'نوع المراقبة التقنية': inspection ? inspection.inspectionType : '-',
+                    'تاريخ المراقبة التقنية': inspection ? inspection.inspectionDate : '-',
+                    'تاريخ انتهاء المراقبة': inspection ? inspection.endDate : '-',
+                    'الأيام المتبقية للمراقبة': inspection ? getDaysRemaining(inspection.endDate) : '-',
+                    'ملاحظات المراقبة': inspection ? inspection.notes || '-' : '-',
+                    'تاريخ صيانة قطع الغيار': sparePart.length ? sparePart.map(s => s.sparePartsDate).join(', ') : '-',
+                    'ملاحظة قطع الغيار': sparePart.length ? sparePart.map(s => s.sparePartsNote).join(', ') : '-',
+                    'سعر قطع الغيار': sparePart.length ? sparePart.map(s => s.price ? `${s.price} دج` : '-').join(', ') : '-'
+                };
+            });
+
+            const worksheet = XLSX.utils.json_to_sheet(vehicleData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, 'Vehicles Data');
+            XLSX.writeFile(workbook, 'vehicles_data.xlsx');
+        });
+
+        // فلترة الجداول
+        document.getElementById('vehicleSearch').addEventListener('input', () => renderTables());
+        document.getElementById('maintenanceSearch').addEventListener('input', () => renderTables());
+        document.getElementById('inspectionSearch').addEventListener('input', () => renderTables());
+        document.getElementById('sparePartsSearch').addEventListener('input', () => renderTables());
+        document.getElementById('insuranceSearch').addEventListener('input', () => renderInsurancesTable());
+        document.getElementById('insuranceTypeFilter').addEventListener('change', () => renderInsurancesTable());
+        document.getElementById('insuranceStatusFilter').addEventListener('change', () => renderInsurancesTable());
+        document.getElementById('insuranceCompanyFilter').addEventListener('change', () => renderInsurancesTable());
+        document.getElementById('resetInsuranceFilters').addEventListener('click', () => {
+            document.getElementById('insuranceSearch').value = '';
+            document.getElementById('insuranceTypeFilter').value = 'all';
+            document.getElementById('insuranceStatusFilter').value = 'all';
+            document.getElementById('insuranceCompanyFilter').value = 'all';
+            renderInsurancesTable();
+        });
+
+        function getCompanyBadgeClass(company) {
+            switch(company) {
+                case 'ابن عوف': return 'company-ibn-awf';
+                case 'ايست دريليق': return 'company-east-drelig';
+                case 'الجيريا هام موتورز': return 'company-algeria-ham';
+                case 'ابراهيم': return 'company-ibrahim';
+                case 'عتاد شخصي': return 'company-personal';
+                default: return 'bg-gray-100 text-gray-800';
+            }
+        }
+
+        function getInsuranceTypeBadge(type) {
+            switch(type) {
+                case 'تأمين مركبات': return 'insurance-vehicle';
+                case 'تأمين سلع': return 'insurance-goods';
+                default: return 'bg-gray-100 text-gray-800';
+            }
+        }
+
+        function renderTables() {
+            const vehicleSearch = document.getElementById('vehicleSearch').value.toLowerCase();
+            const maintenanceSearch = document.getElementById('maintenanceSearch').value.toLowerCase();
+            const inspectionSearch = document.getElementById('inspectionSearch').value.toLowerCase();
+            const sparePartsSearch = document.getElementById('sparePartsSearch').value.toLowerCase();
+
+            // جدول المركبات
+            const vehiclesTableBody = document.getElementById('vehiclesTableBody');
+            vehiclesTableBody.innerHTML = '';
+            
+            vehicles
+                .filter(v => v.plateNumber.toLowerCase().includes(vehicleSearch))
+                .filter(v => currentCompanyFilter === 'all' || v.company === currentCompanyFilter)
+                .forEach(vehicle => {
+                    const insurance = insurances.find(ins => ins.plateNumber === vehicle.plateNumber);
+                    const row = document.createElement('tr');
+                    let daysRemaining = '-';
+                    let status = '-';
+
+                    if (insurance) {
+                        daysRemaining = getDaysRemaining(insurance.endDate);
+                        if (daysRemaining <= 0) {
+                            status = 'منتهي';
+                            row.classList.add('expired');
+                        } else if (daysRemaining <= 7) {
+                            status = 'قريب من الانتهاء';
+                            row.classList.add('warning');
+                        } else {
+                            status = 'فعال';
+                        }
+                    }
+
+                    row.innerHTML = `
+                        <td class="p-3">${vehicle.brand}</td>
+                        <td class="p-3">${vehicle.model}</td>
+                        <td class="p-3">${vehicle.plateNumber}</td>
+                        <td class="p-3">${vehicle.driverName}</td>
+                        <td class="p-3">${vehicle.vehicleType}</td>
+                        <td class="p-3">
+                            <span class="company-badge ${getCompanyBadgeClass(vehicle.company)}">
+                                ${vehicle.company}
+                            </span>
+                        </td>
+                        <td class="p-3">${insurance ? insurance.startDate : '-'}</td>
+                        <td class="p-3">${insurance ? insurance.endDate : '-'}</td>
+                        <td class="text-center p-3">${daysRemaining}</td>
+                        <td class="text-center p-3">${status}</td>
+                        <td class="p-3 no-print">
+                            <button onclick="editVehicle('${vehicle.id}')" class="action-btn text-blue-600 hover:text-blue-800 mr-2">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button onclick="deleteVehicle('${vehicle.id}')" class="action-btn text-red-600 hover:text-red-800">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    `;
+                    vehiclesTableBody.appendChild(row);
+                });
+
+            // جدول صيانة الزيوت
+            const maintenanceTableBody = document.getElementById('maintenanceTableBody');
+            maintenanceTableBody.innerHTML = '';
+            
+            maintenances
+                .filter(m => m.plateNumber.toLowerCase().includes(maintenanceSearch))
+                .filter(m => {
+                    if (currentCompanyFilter === 'all') return true;
+                    const vehicle = vehicles.find(v => v.plateNumber === m.plateNumber);
+                    return vehicle && vehicle.company === currentCompanyFilter;
+                })
+                .forEach(maintenance => {
+                    const vehicle = vehicles.find(v => v.plateNumber === maintenance.plateNumber);
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td class="p-3">${maintenance.plateNumber}</td>
+                        <td class="p-3">${maintenance.oilType || '-'}</td>
+                        <td class="p-3">${maintenance.maintenanceNotes || '-'}</td>
+                        <td class="p-3">
+                            ${vehicle ? `
+                                <span class="company-badge ${getCompanyBadgeClass(vehicle.company)}">
+                                    ${vehicle.company}
+                                </span>
+                            ` : '-'}
+                        </td>
+                        <td class="p-3">${maintenance.oilChangeDate}</td>
+                        <td class="p-3">${maintenance.currentMileage}</td>
+                        <td class="p-3">${maintenance.nextMileage}</td>
+                        <td class="p-3 no-print">
+                            <button onclick="editMaintenance('${maintenance.id}')" class="action-btn text-blue-600 hover:text-blue-800 mr-2">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button onclick="deleteMaintenance('${maintenance.id}')" class="action-btn text-red-600 hover:text-red-800">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    `;
+                    maintenanceTableBody.appendChild(row);
+                });
+
+            // جدول المراقبة التقنية
+            const inspectionTableBody = document.getElementById('inspectionTableBody');
+            inspectionTableBody.innerHTML = '';
+            
+            inspections
+                .filter(ins => ins.plateNumber.toLowerCase().includes(inspectionSearch))
+                .filter(ins => {
+                    if (currentCompanyFilter === 'all') return true;
+                    const vehicle = vehicles.find(v => v.plateNumber === ins.plateNumber);
+                    return vehicle && vehicle.company === currentCompanyFilter;
+                })
+                .forEach(inspection => {
+                    const vehicle = vehicles.find(v => v.plateNumber === inspection.plateNumber);
+                    const daysRemaining = getDaysRemaining(inspection.endDate);
+                    let statusClass = '';
+                    
+                    if (daysRemaining <= 0) {
+                        statusClass = 'bg-red-100 text-red-800';
+                    } else if (daysRemaining <= 30) {
+                        statusClass = 'bg-yellow-100 text-yellow-800';
+                    } else {
+                        statusClass = 'bg-green-100 text-green-800';
+                    }
+
+                    const row = document.createElement('tr');
+                    if (daysRemaining <= 0) {
+                        row.classList.add('expired');
+                    } else if (daysRemaining <= 30) {
+                        row.classList.add('warning');
+                    }
+
+                    row.innerHTML = `
+                        <td class="p-3">${inspection.plateNumber}</td>
+                        <td class="p-3">${inspection.inspectionType}</td>
+                        <td class="p-3">${inspection.notes || '-'}</td>
+                        <td class="p-3">
+                            ${vehicle ? `
+                                <span class="company-badge ${getCompanyBadgeClass(vehicle.company)}">
+                                    ${vehicle.company}
+                                </span>
+                            ` : '-'}
+                        </td>
+                        <td class="p-3">${inspection.inspectionDate}</td>
+                        <td class="p-3">${inspection.endDate}</td>
+                        <td class="p-3 text-center"><span class="px-2 py-1 rounded-full text-xs ${statusClass}">${daysRemaining}</span></td>
+                        <td class="p-3 no-print">
+                            <button onclick="editInspection('${inspection.id}')" class="action-btn text-blue-600 hover:text-blue-800 mr-2">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button onclick="deleteInspection('${inspection.id}')" class="action-btn text-red-600 hover:text-red-800">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    `;
+                    inspectionTableBody.appendChild(row);
+                });
+
+            // جدول قطع الغيار
+            const sparePartsTableBody = document.getElementById('sparePartsTableBody');
+            sparePartsTableBody.innerHTML = '';
+            
+            const filteredSpareParts = spareParts
+                .filter(s => s.plateNumber.toLowerCase().includes(sparePartsSearch))
+                .filter(s => {
+                    if (currentCompanyFilter === 'all') return true;
+                    const vehicle = vehicles.find(v => v.plateNumber === s.plateNumber);
+                    return vehicle && vehicle.company === currentCompanyFilter;
+                });
+
+            // حساب الإجمالي الشهري
+            const currentMonth = new Date().getMonth() + 1;
+            const currentYear = new Date().getFullYear();
+            const monthlyTotal = filteredSpareParts.reduce((total, part) => {
+                const partDate = new Date(part.sparePartsDate);
+                if (partDate.getMonth() + 1 === currentMonth && partDate.getFullYear() === currentYear) {
+                    return total + (part.price || 0);
+                }
+                return total;
+            }, 0);
+
+            // عرض بيانات قطع الغيار
+            filteredSpareParts.forEach(sparePart => {
+                const vehicle = vehicles.find(v => v.plateNumber === sparePart.plateNumber);
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="p-3">${sparePart.plateNumber}</td>
+                    <td class="p-3">
+                        ${vehicle ? `
+                            <span class="company-badge ${getCompanyBadgeClass(vehicle.company)}">
+                                ${vehicle.company}
+                            </span>
+                        ` : '-'}
+                    </td>
+                    <td class="p-3">${sparePart.sparePartsDate}</td>
+                    <td class="p-3">${sparePart.sparePartsNote}</td>
+                    <td class="p-3">${sparePart.price ? sparePart.price + ' دج' : '-'}</td>
+                    <td class="p-3 no-print">
+                        <button onclick="editSparePart('${sparePart.id}')" class="action-btn text-blue-600 hover:text-blue-800 mr-2">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button onclick="deleteSparePart('${sparePart.id}')" class="action-btn text-red-600 hover:text-red-800">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                sparePartsTableBody.appendChild(row);
+            });
+
+            // إضافة صف الإجمالي الشهري
+            const monthlyTotalRow = document.getElementById('monthlyTotalRow');
+            monthlyTotalRow.innerHTML = `
+                <tr class="monthly-total">
+                    <td class="p-3" colspan="4" style="text-align: left;">الإجمالي الشهري:</td>
+                    <td class="p-3">${monthlyTotal} دج</td>
+                    <td class="p-3 no-print"></td>
+                </tr>
+            `;
+        }
+
+        function renderInsurancesTable() {
+            const searchTerm = document.getElementById('insuranceSearch').value.toLowerCase();
+            const typeFilter = document.getElementById('insuranceTypeFilter').value;
+            const statusFilter = document.getElementById('insuranceStatusFilter').value;
+            const companyFilter = document.getElementById('insuranceCompanyFilter').value;
+
+            const insurancesTableBody = document.getElementById('insurancesTableBody');
+            insurancesTableBody.innerHTML = '';
+
+            insurances
+                .filter(ins => 
+                    ins.plateNumber ? ins.plateNumber.toLowerCase().includes(searchTerm) : 
+                    ins.insuranceType === 'تأمين سلع' && 'تأمين سلع'.includes(searchTerm))
+                .filter(ins => {
+                    if (typeFilter === 'all') return true;
+                    return ins.insuranceType === typeFilter;
+                })
+                .filter(ins => {
+                    if (statusFilter === 'all') return true;
+                    const daysRemaining = getDaysRemaining(ins.endDate);
+                    if (statusFilter === 'active') return daysRemaining > 7;
+                    if (statusFilter === 'expiring') return daysRemaining <= 7 && daysRemaining >= 0;
+                    if (statusFilter === 'expired') return daysRemaining < 0;
+                    return true;
+                })
+                .filter(ins => {
+                    if (companyFilter === 'all') return true;
+                    if (!ins.plateNumber) return companyFilter === 'عتاد شخصي';
+                    const vehicle = vehicles.find(v => v.plateNumber === ins.plateNumber);
+                    return vehicle && vehicle.company === companyFilter;
+                })
+                .forEach(insurance => {
+                    const vehicle = vehicles.find(v => v.plateNumber === insurance.plateNumber);
+                    const daysRemaining = getDaysRemaining(insurance.endDate);
+                    let status = '';
+                    let statusClass = '';
+
+                    if (daysRemaining <= 0) {
+                        status = 'منتهي';
+                        statusClass = 'bg-red-100 text-red-800';
+                    } else if (daysRemaining <= 7) {
+                        status = 'قريب من الانتهاء';
+                        statusClass = 'bg-yellow-100 text-yellow-800';
+                    } else {
+                        status = 'فعال';
+                        statusClass = 'bg-green-100 text-green-800';
+                    }
+
+                    const row = document.createElement('tr');
+                    if (daysRemaining <= 0) {
+                        row.classList.add('expired');
+                    } else if (daysRemaining <= 7) {
+                        row.classList.add('warning');
+                    }
+
+                    row.innerHTML = `
+                        <td class="p-3">${insurance.plateNumber || 'تأمين سلع'}</td>
+                        <td class="p-3">
+                            <span class="insurance-type-badge ${getInsuranceTypeBadge(insurance.insuranceType)}">
+                                ${insurance.insuranceType || 'تأمين مركبات'}
+                            </span>
+                        </td>
+                        <td class="p-3">${vehicle ? `${vehicle.brand} ${vehicle.model}` : 'غير معروف'}</td>
+                        <td class="p-3">
+                            ${vehicle ? `
+                                <span class="company-badge ${getCompanyBadgeClass(vehicle.company)}">
+                                    ${vehicle.company}
+                                </span>
+                            ` : insurance.plateNumber ? 'غير معروف' : 'عتاد شخصي'}
+                        </td>
+                        <td class="p-3">${insurance.startDate}</td>
+                        <td class="p-3">${insurance.endDate}</td>
+                        <td class="p-3 text-center">${daysRemaining}</td>
+                        <td class="p-3 text-center"><span class="px-2 py-1 rounded-full text-xs ${statusClass}">${status}</span></td>
+                        <td class="p-3 no-print">
+                            <button onclick="editInsurance('${insurance.id}')" class="action-btn text-blue-600 hover:text-blue-800 mr-2">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button onclick="deleteInsurance('${insurance.id}')" class="action-btn text-red-600 hover:text-red-800">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    `;
+                    insurancesTableBody.appendChild(row);
+                });
+        }
+
+        // حذف صيانة زيت
+        window.deleteMaintenance = async function(id) {
+            Swal.fire({
+                title: 'هل أنت متأكد؟',
+                text: 'سيتم حذف سجل صيانة الزيت!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'نعم، احذف!',
+                cancelButtonText: 'إلغاء'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    try {
+                        await remove(ref(database, 'maintenances/' + id));
+                        maintenances = maintenances.filter(m => m.id !== id);
+                        renderTables();
+                        updateStats();
+                        Swal.fire('تم الحذف!', 'تم حذف سجل الصيانة بنجاح.', 'success');
+                    } catch (error) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'خطأ',
+                            text: 'حدث خطأ أثناء الحذف: ' + error.message
+                        });
+                    }
+                }
+            });
+        };
+
+        // حذف مراقبة تقنية
+        window.deleteInspection = async function(id) {
+            Swal.fire({
+                title: 'هل أنت متأكد؟',
+                text: 'سيتم حذف سجل المراقبة التقنية!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'نعم، احذف!',
+                cancelButtonText: 'إلغاء'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    try {
+                        await remove(ref(database, 'SCANER/' + id));
+                        inspections = inspections.filter(ins => ins.id !== id);
+                        renderTables();
+                        updateStats();
+                        Swal.fire('تم الحذف!', 'تم حذف سجل المراقبة بنجاح.', 'success');
+                    } catch (error) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'خطأ',
+                            text: 'حدث خطأ أثناء الحذف: ' + error.message
+                        });
+                    }
+                }
+            });
+        };
+
+        // حذف قطع غيار
+        window.deleteSparePart = async function(id) {
+            Swal.fire({
+                title: 'هل أنت متأكد؟',
+                text: 'سيتم حذف سجل قطع الغيار!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'نعم، احذف!',
+                cancelButtonText: 'إلغاء'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    try {
+                        await remove(ref(database, 'spareParts/' + id));
+                        spareParts = spareParts.filter(s => s.id !== id);
+                        renderTables();
+                        Swal.fire('تم الحذف!', 'تم حذف تسجيل قطع الغيار بنجاح.', 'success');
+                    } catch (error) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'خطأ',
+                            text: 'حدث خطأ أثناء الحذف: ' + error.message
+                        });
+                    }
+                }
+            });
+        };
+
+        // حذف تأمين
+        window.deleteInsurance = async function(id) {
+            Swal.fire({
+                title: 'هل أنت متأكد؟',
+                text: 'سيتم حذف سجل التأمين!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'نعم، احذف!',
+                cancelButtonText: 'إلغاء'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    try {
+                        await remove(ref(database, 'insurances/' + id));
+                        insurances = insurances.filter(i => i.id !== id);
+                        renderTables();
+                        renderInsurancesTable();
+                        updateStats();
+                        Swal.fire('تم الحذف!', 'تم حذف التأمين بنجاح.', 'success');
+                    } catch (error) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'خطأ',
+                            text: 'حدث خطأ أثناء الحذف: ' + error.message
+                        });
+                    }
+                }
+            });
+        };
+    </script>
+</body>
+</html>
