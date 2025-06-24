@@ -30,7 +30,13 @@
         .warning { background-color: #fef3c7; }
         .stats-card { transition: transform 0.3s; }
         .stats-card:hover { transform: scale(1.05); }
-        .navbar { background-color: #1e3a8a; }
+        .navbar { 
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), 
+                       url('https://thumbs.dreamstime.com/b/global-business-logistics-import-export-background-container-cargo-freight-ship-transport-concept-137944087.jpg?w=992');
+            background-size: cover;
+            background-position: center;
+            color: white;
+        }
         .search-input { transition: width 0.3s; }
         .search-input:focus { width: 300px; }
         .login-container {
@@ -110,7 +116,7 @@
             border-top: 2px solid #dee2e6;
         }
         .print-btn {
-            background-color: #6b7280;
+            background-color: #4b5563;
             color: white;
             padding: 0.5rem 1rem;
             border-radius: 0.25rem;
@@ -118,10 +124,15 @@
             transition: all 0.3s;
             display: inline-flex;
             align-items: center;
+            border: none;
+            cursor: pointer;
         }
         .print-btn:hover {
-            background-color: #4b5563;
+            background-color: #374151;
             transform: translateY(-2px);
+        }
+        .print-btn i {
+            margin-left: 0.5rem;
         }
         .pagination {
             display: flex;
@@ -168,6 +179,13 @@
                 color: white !important;
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
+            }
+            table {
+                width: 100% !important;
+                font-size: 12px !important;
+            }
+            th, td {
+                padding: 4px !important;
             }
         }
     </style>
@@ -307,7 +325,7 @@
                 <h2 class="text-xl font-semibold text-gray-700"><i class="fas fa-table mr-2"></i> قائمة المركبات</h2>
                 <div>
                     <button onclick="printTable('vehiclesTable', 'قائمة المركبات')" class="print-btn">
-                        <i class="fas fa-print mr-2"></i> طباعة
+                        <i class="fas fa-print"></i> طباعة
                     </button>
                     <input type="text" id="vehicleSearch" placeholder="ابحث برقم التسجيل..." class="p-2 border rounded search-input w-40 focus:w-64">
                 </div>
@@ -343,7 +361,7 @@
                 <h2 class="text-xl font-semibold text-gray-700"><i class="fas fa-oil-can mr-2"></i> سجل صيانة الزيوت</h2>
                 <div>
                     <button onclick="printTable('maintenanceTable', 'سجل صيانة الزيوت')" class="print-btn">
-                        <i class="fas fa-print mr-2"></i> طباعة
+                        <i class="fas fa-print"></i> طباعة
                     </button>
                     <input type="text" id="maintenanceSearch" placeholder="ابحث برقم التسجيل..." class="p-2 border rounded search-input w-40 focus:w-64">
                 </div>
@@ -374,7 +392,7 @@
                 <h2 class="text-xl font-semibold text-gray-700"><i class="fas fa-car-crash mr-2"></i> سجل المراقبة التقنية</h2>
                 <div>
                     <button onclick="printTable('inspectionTable', 'سجل المراقبة التقنية')" class="print-btn">
-                        <i class="fas fa-print mr-2"></i> طباعة
+                        <i class="fas fa-print"></i> طباعة
                     </button>
                     <input type="text" id="inspectionSearch" placeholder="ابحث برقم التسجيل..." class="p-2 border rounded search-input w-40 focus:w-64">
                 </div>
@@ -405,7 +423,7 @@
                 <h2 class="text-xl font-semibold text-gray-700"><i class="fas fa-tools mr-2"></i> سجل صيانة قطع الغيار</h2>
                 <div>
                     <button onclick="printTable('sparePartsTable', 'سجل صيانة قطع الغيار')" class="print-btn">
-                        <i class="fas fa-print mr-2"></i> طباعة
+                        <i class="fas fa-print"></i> طباعة
                     </button>
                     <input type="text" id="sparePartsSearch" placeholder="ابحث برقم التسجيل..." class="p-2 border rounded search-input w-40 focus:w-64">
                 </div>
@@ -474,7 +492,7 @@
                         <i class="fas fa-redo mr-1"></i> إعادة تعيين
                     </button>
                     <button onclick="printTable('insurancesTable', 'سجل التأمينات')" class="print-btn">
-                        <i class="fas fa-print mr-1"></i> طباعة
+                        <i class="fas fa-print"></i> طباعة
                     </button>
                 </div>
             </div>
@@ -560,21 +578,25 @@
                         .warning { background-color: #fef3c7; }
                         .print-title { text-align: center; margin-bottom: 20px; font-size: 18px; font-weight: bold; }
                         .print-date { text-align: left; margin-top: 20px; font-size: 12px; }
+                        @page { size: auto; margin: 5mm; }
                     </style>
                 </head>
                 <body>
                     <h1 class="print-title">${title}</h1>
                     ${document.getElementById(tableId).innerHTML}
                     <div class="print-date">تم الطباعة في: ${new Date().toLocaleString()}</div>
+                    <script>
+                        window.onload = function() {
+                            setTimeout(function() {
+                                window.print();
+                                window.close();
+                            }, 200);
+                        };
+                    <\/script>
                 </body>
                 </html>
             `);
             printWindow.document.close();
-            printWindow.focus();
-            setTimeout(() => {
-                printWindow.print();
-                printWindow.close();
-            }, 500);
         }
 
         // دالة إنشاء التقسيم (Pagination)
